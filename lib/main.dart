@@ -88,51 +88,114 @@ class VideoSplashPage extends StatefulWidget {
 class _VideoSplashPageState extends State<VideoSplashPage> {
   late VideoPlayerController _controller;
   bool _navigated = false;
+  bool _videoInitialized = false;
+  VoidCallback? _listener;
+  Timer? _initTimeout;
+  static const kSplashOrange = Color(0xfff7B43f);
 
   @override
   void initState() {
     super.initState();
-    _controller = VideoPlayerController.asset('assets/splash/splash_video.mp4')
-      ..initialize().then((_) {
-        // start playback when ready
-        _controller.play();
-        _controller.setVolume(0.0);
-        // ensure video plays once
-        _controller.setLooping(false);
-        setState(() {});
-      });
 
-    // Listener to detect end of video and navigate once
-    _controller.addListener(() {
-      if (!_controller.value.isInitialized || _navigated) return;
-      final position = _controller.value.position;
-      final duration = _controller.value.duration;
-      if (position >= duration - const Duration(milliseconds: 100)) {
-        _navigated = true;
-        // small delay to ensure last frame rendered
-        Timer(const Duration(milliseconds: 50), () {
-          if (!mounted) return;
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (_) => const Login()),
-          );
-        });
+    // Start a short timeout so we don't get stuck on the splash/logo.
+    _initTimeout = Timer(const Duration(seconds: 3), () {
+      if (!_videoInitialized && !_navigated) {
+        _navigateToLogin();
       }
     });
+
+    _controller = VideoPlayerController.asset('assets/splash/splash_video.mp4');
+
+    // Initialize, start playback and set up listener.
+    _controller
+        .initialize()
+        .then((_) async {
+          // mark initialized and start playing
+          if (mounted) {
+            setState(() {
+              _videoInitialized = true;
+            });
+          }
+          try {
+            await _controller.setLooping(false);
+            await _controller.setVolume(0.0); // keep muted if desired
+            await _controller.play();
+          } catch (_) {
+            // ignore play errors here; the timeout/fallback will handle it
+          }
+        })
+        .catchError((err, st) {
+          // initialization failed -> fallback
+
+          if (!_navigated) _navigateToLogin();
+        });
+
+    // listener to detect end of video (use stored callback to remove later)
+    _listener = () {
+      if (!_controller.value.isInitialized || _navigated) return;
+      final duration = _controller.value.duration;
+      final position = _controller.value.position;
+      if (duration.inMilliseconds > 0 &&
+          position >= duration - const Duration(milliseconds: 150)) {
+        _navigated = true;
+        // small delay to render last frame then navigate
+        Future.delayed(const Duration(milliseconds: 50), () {
+          if (!mounted) return;
+          _navigateToLogin();
+        });
+      }
+    };
+    _controller.addListener(_listener!);
+  }
+
+  void _navigateToLogin() {
+    if (!mounted) return;
+    // cancel timeout and remove listener before navigating
+    _initTimeout?.cancel();
+    try {
+      if (_listener != null) _controller.removeListener(_listener!);
+    } catch (_) {}
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (_) => const Login()),
+    );
   }
 
   @override
   void dispose() {
-    _controller.removeListener(() {});
+    _initTimeout?.cancel();
+    if (_listener != null) {
+      try {
+        _controller.removeListener(_listener!);
+      } catch (_) {}
+    }
     _controller.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    // Keep same background as native splash (orange) and show branding while
+    // the video initializes to avoid any black flash between splash -> video.
     return Scaffold(
-      body: _controller.value.isInitialized
-          ? SizedBox.expand(
+      backgroundColor: kSplashOrange,
+      body: Stack(
+        fit: StackFit.expand,
+        children: [
+          // Full-screen branding background (covers entire screen, not centered)
+          Positioned.fill(
+            child: Image.asset(
+              'assets/splash/logo.png',
+              fit: BoxFit.cover, // use cover so no black bars show
+            ),
+          ),
+
+          // Video layer: fade in once initialized to smoothly replace the branding
+          if (_controller.value.isInitialized)
+            AnimatedOpacity(
+              opacity: _videoInitialized ? 1.0 : 0.0,
+              duration: const Duration(milliseconds: 400),
+              curve: Curves.easeInOut,
               child: FittedBox(
                 fit: BoxFit.cover,
                 clipBehavior: Clip.hardEdge,
@@ -142,8 +205,9 @@ class _VideoSplashPageState extends State<VideoSplashPage> {
                   child: VideoPlayer(_controller),
                 ),
               ),
-            )
-          : Container(color: Colors.black),
+            ),
+        ],
+      ),
     );
   }
 }
