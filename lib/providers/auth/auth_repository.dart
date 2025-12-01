@@ -211,6 +211,23 @@ class AuthRepository {
   Future<void> logOut() async {
     await _supabase.auth.signOut();
   }
+
+
+
+    //NOTE - RESET PASSWORD
+
+  Future<String?> resetPassword(String email) async {
+  try {
+    await _supabase.auth.resetPasswordForEmail(
+      email,
+      redirectTo: 'io.supabase.flutterquickstart://login-callback/',
+    );
+    return null; // no error
+  } catch (e) {
+    return e.toString();
+  }
+}
+
 }
 
 final authRepositoryProvider = Provider<AuthRepository>((ref) {

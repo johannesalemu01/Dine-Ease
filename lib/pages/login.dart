@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:dine_ease/pages/signup.dart';
 import 'package:dine_ease/widgets/bottom_navigation.dart';
+import 'package:dine_ease/pages/forgot_password.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' show Colors;
@@ -227,11 +228,26 @@ class _LoginState extends ConsumerState<Login> {
                     ),
                   ),
                   const SizedBox(height: 6),
-                  const Padding(
-                    padding: EdgeInsets.only(right: 32.0),
+                  Padding(
+                    padding: const EdgeInsets.only(right: 32.0),
                     child: Align(
                       alignment: Alignment.centerRight,
-                      child: Text('Forgot Password'),
+                      child: GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const ForgotPasswordPage(),
+                            ),
+                          );
+                        },
+                        child: const Text(
+                          'Forgot Password',
+                          style: TextStyle(
+                            decoration: TextDecoration.underline,
+                          ),
+                        ),
+                      ),
                     ),
                   ),
                   Padding(

@@ -63,4 +63,17 @@ class AuthController extends StateNotifier<AuthState> {
       state = state.copyWith(loading: false, error: err);
     }
   }
+
+
+  Future<void> sendPasswordReset(String email) async {
+  state = state.copyWith(loading: true, error: null);
+
+  final err = await _repo.resetPassword(email);
+
+  state = state.copyWith(
+    loading: false,
+    error: err,
+  );
+}
+
 }

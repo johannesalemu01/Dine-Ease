@@ -48,17 +48,24 @@
 		<key>UIStatusBarHidden</key>
 		<false/>
 		<key>CFBundleURLTypes</key>
-    <array>
-	    <dict>
-		  <key>CFBundleTypeRole</key>
-		  <string>Editor</string>
-		  <key>CFBundleURLSchemes</key>
 		<array>
-			<!-- TODO Replace this value: -->
-			<!-- Copied from GoogleService-Info.plist key REVERSED_CLIENT_ID -->
-			<string>com.googleusercontent.apps.27541323707-fi8lsf9djjki4cqcgfpg2tfe2tr6qem0	</string>
+		  <!-- Google reversed client id (copied from GoogleService-Info.plist REVERSED_CLIENT_ID) -->
+		  <dict>
+		    <key>CFBundleTypeRole</key>
+		    <string>Editor</string>
+		    <key>CFBundleURLSchemes</key>
+		    <array>
+		      <string>com.googleusercontent.apps.27541323707-fi8lsf9djjki4cqcgfpg2tfe2tr6qem0</string>
+		    </array>
+		  </dict>
+
+		  <!-- Supabase redirect scheme -->
+		  <dict>
+		    <key>CFBundleURLSchemes</key>
+		    <array>
+		      <string>io.supabase.flutterquickstart</string>
+		    </array>
+		  </dict>
 		</array>
-	</dict>
-</array>
 	</dict>
 </plist>
