@@ -1,17 +1,20 @@
+import 'package:dine_ease/providers/auth/auth_controller.dart';
 import 'package:flutter/material.dart';
+import 'package:dine_ease/pages/login.dart';
 import 'package:dine_ease/pages/profile/loyality_points.dart';
 import 'package:dine_ease/pages/profile/personal_info.dart';
 import 'package:dine_ease/pages/profile/refer_friend.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 // import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
-class ProfilePage extends StatefulWidget {
+class ProfilePage extends ConsumerStatefulWidget {
   const ProfilePage({super.key});
 
   @override
-  State<ProfilePage> createState() => _ProfilePageState();
+  ConsumerState<ProfilePage> createState() => _ProfilePageState();
 }
 
-class _ProfilePageState extends State<ProfilePage> {
+class _ProfilePageState extends ConsumerState<ProfilePage> {
   @override
   Widget build(BuildContext context) {
     double height = MediaQuery.of(context).size.height;
@@ -27,9 +30,7 @@ class _ProfilePageState extends State<ProfilePage> {
           ),
           child: Column(
             children: [
-              const SizedBox(
-                height: 60,
-              ),
+              const SizedBox(height: 60),
               SizedBox(
                 height: height / 5,
                 child: const Center(
@@ -39,8 +40,9 @@ class _ProfilePageState extends State<ProfilePage> {
                       children: [
                         CircleAvatar(
                           // backgroundColor: Color.fromARGB(255, 255, 132, 0),
-                          backgroundImage:
-                              AssetImage('assets/images/mesob.png'),
+                          backgroundImage: AssetImage(
+                            'assets/images/mesob.png',
+                          ),
                           radius: 45,
                           // child: Image.asset('assets/images/mesob.png'),
                           // child: Text(
@@ -51,18 +53,17 @@ class _ProfilePageState extends State<ProfilePage> {
                           //       fontSize: 42),
                           // ),
                         ),
-                        SizedBox(
-                          width: 8,
-                        ),
+                        SizedBox(width: 8),
                         Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(
                               'Yohannes Alemu',
                               style: TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 20),
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 20,
+                              ),
                             ),
                             Text(
                               'jo@gmail.com',
@@ -71,11 +72,7 @@ class _ProfilePageState extends State<ProfilePage> {
                           ],
                         ),
                         Spacer(),
-                        Icon(
-                          Icons.edit_note,
-                          color: Colors.white60,
-                          size: 30,
-                        )
+                        Icon(Icons.edit_note, color: Colors.white60, size: 30),
                       ],
                     ),
                   ),
@@ -87,8 +84,9 @@ class _ProfilePageState extends State<ProfilePage> {
                   decoration: const BoxDecoration(
                     color: Color.fromARGB(255, 11, 23, 36),
                     borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(20),
-                        topRight: Radius.circular(20)),
+                      topLeft: Radius.circular(20),
+                      topRight: Radius.circular(20),
+                    ),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -102,34 +100,39 @@ class _ProfilePageState extends State<ProfilePage> {
                             const Text(
                               'Rewards',
                               style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold),
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                             GestureDetector(
                               onTap: () {
                                 Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) =>
-                                            const LoyalityPoint()));
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => const LoyalityPoint(),
+                                  ),
+                                );
                               },
                               child: ProfileTile(
-                                  rewardPoints: rewardPoints,
-                                  labelText: 'Loyalty Point',
-                                  icon: Icons.loyalty_rounded),
+                                rewardPoints: rewardPoints,
+                                labelText: 'Loyalty Point',
+                                icon: Icons.loyalty_rounded,
+                              ),
                             ),
                             GestureDetector(
                               onTap: () {
                                 Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) =>
-                                            const ReferFriend()));
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => const ReferFriend(),
+                                  ),
+                                );
                               },
                               child: const ProfileTile(
-                                  labelText: 'Refer a friend',
-                                  icon: Icons.person_add_alt_1_outlined),
+                                labelText: 'Refer a friend',
+                                icon: Icons.person_add_alt_1_outlined,
+                              ),
                             ),
                           ],
                         ),
@@ -142,12 +145,15 @@ class _ProfilePageState extends State<ProfilePage> {
                             Text(
                               'Your Activity',
                               style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold),
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                             ProfileTile(
-                                labelText: 'History', icon: Icons.history),
+                              labelText: 'History',
+                              icon: Icons.history,
+                            ),
                           ],
                         ),
                       ),
@@ -159,12 +165,15 @@ class _ProfilePageState extends State<ProfilePage> {
                             Text(
                               'TheMosob Pay',
                               style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold),
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                             ProfileTile(
-                                labelText: 'Payment', icon: Icons.payments),
+                              labelText: 'Payment',
+                              icon: Icons.payments,
+                            ),
                           ],
                         ),
                       ),
@@ -176,61 +185,86 @@ class _ProfilePageState extends State<ProfilePage> {
                             const Text(
                               'About You',
                               style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold),
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                             GestureDetector(
                               onTap: () => Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) =>
-                                          const PersonalInformation())),
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      const PersonalInformation(),
+                                ),
+                              ),
                               child: const ProfileTile(
-                                  labelText: 'personal details',
-                                  icon: Icons.person_outline_outlined),
+                                labelText: 'personal details',
+                                icon: Icons.person_outline_outlined,
+                              ),
                             ),
                             const SizedBox(height: 5),
                             GestureDetector(
                               onTap: () => Navigator.pushNamed(
-                                  context, '/settings_page'),
+                                context,
+                                '/settings_page',
+                              ),
                               child: const ProfileTile(
-                                  labelText: 'Settings', icon: Icons.settings),
+                                labelText: 'Settings',
+                                icon: Icons.settings,
+                              ),
                             ),
                           ],
                         ),
                       ),
                       Container(
                         padding: const EdgeInsets.all(16),
-                        child: const Column(
+                        child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
+                            const Text(
                               'Help center',
                               style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold),
-                            ),
-                            ProfileTile(
-                                labelText: 'Get support',
-                                icon: Icons.help_outline),
-                            SizedBox(height: 20),
-                            SizedBox(
-                              child: Text(
-                                'Log out',
-                                style: TextStyle(color: Colors.deepOrange),
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
-                            SizedBox(
-                              height: 30,
+                            const ProfileTile(
+                              labelText: 'Get support',
+                              icon: Icons.help_outline,
                             ),
-                            Align(
+                            const SizedBox(height: 20),
+                            SizedBox(
+                              child: GestureDetector(
+                                onTap: () async {
+                                  final controller = ref.read(
+                                    authControllerProvider.notifier,
+                                  );
+                                  await controller.logout();
+                                  // navigate to Login and clear back stack so user can't go back
+                                  if (!mounted) return;
+                                  Navigator.pushAndRemoveUntil(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => const Login(),
+                                    ),
+                                    (route) => false,
+                                  );
+                                },
+                                child: const Text(
+                                  'Log out',
+                                  style: TextStyle(color: Colors.deepOrange),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 30),
+                            const Align(
                               child: Text(
                                 '1.0.00',
                                 style: TextStyle(color: Colors.white54),
                               ),
-                            )
+                            ),
                           ],
                         ),
                       ),
@@ -262,19 +296,11 @@ class ProfileTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        const SizedBox(
-          height: 15,
-        ),
+        const SizedBox(height: 15),
         Row(
           children: [
-            Icon(
-              icon,
-              size: 22,
-              color: Colors.white70,
-            ),
-            const SizedBox(
-              width: 12,
-            ),
+            Icon(icon, size: 22, color: Colors.white70),
+            const SizedBox(width: 12),
             Text(
               labelText,
               style: const TextStyle(color: Colors.white70, fontSize: 13),
@@ -289,16 +315,10 @@ class ProfileTile extends StatelessWidget {
                 ),
                 child: Text(
                   '$rewardPoints points',
-                  style: const TextStyle(
-                    color: Colors.white,
-                  ),
+                  style: const TextStyle(color: Colors.white),
                 ),
               ),
-            const Icon(
-              Icons.chevron_right,
-              color: Colors.white,
-              size: 20,
-            ),
+            const Icon(Icons.chevron_right, color: Colors.white, size: 20),
           ],
         ),
       ],

@@ -77,14 +77,7 @@ class AuthRepository {
 
           // Append diagnostic hints for the developer / user
           message +=
-              '\n\nHint: Supabase rejected the email format. Common causes:\n'
-              '- The project\'s Auth settings may restrict allowed email domains or disable email signups (Dashboard → Authentication → Settings).\n'
-              '- The email contains invisible/control characters (zero-width, BOM). Ensure the input is trimmed/normalized.\n'
-              '- The server may enforce additional validation via hooks/edge functions.\n\n'
-              'Try:\n'
-              '1) Verify the exact bytes of the email you sent (logs) and try a simple address such as test@example.com via curl.\n'
-              '2) Check Supabase Auth settings (Allowed email domains / Disable signups / Email sign-in enabled).\n'
-              '3) Reproduce the request using curl: POST /auth/v1/signup with JSON { "email": "you@example.com", "password": "..." } using the anon key.\n';
+              '.Hint: Supabase rejected the email format';
         } else {
           message = code != null ? '$msg (code: $code)' : '$msg';
         }

@@ -51,6 +51,16 @@ class AuthController extends StateNotifier<AuthState> {
   }
 
   Future<void> logout() async {
-    await _repo.logOut();
+    // show loading while signing out
+    state = state.copyWith(loading: true, error: null);
+    try {
+      await _repo.logOut();
+      // signed out successfully
+      state = state.copyWith(loading: false, error: null);
+    } catch (e) {
+      // surface error to UI if needed
+      final err = e.toString() ?? 'Logout failed';
+      state = state.copyWith(loading: false, error: err);
+    }
   }
 }

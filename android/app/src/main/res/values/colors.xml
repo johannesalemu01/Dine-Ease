@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="ic_launcher_background">#ffffff</color>
-    <color name="launcher_background">#f7B43f</color>
+  <!-- Use valid 8-digit ARGB (#AARRGGBB) values -->
+  <color name="ic_launcher_background">#fff9c2</color>
+  <color name="launcher_background">#fffff9c2</color>
 </resources>
