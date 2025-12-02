@@ -10,6 +10,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:video_player/video_player.dart';
 import 'dart:async';
+import 'package:dine_ease/pages/new_password.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -58,11 +59,42 @@ Future<void> main() async {
 // Use a getter so callers access the client after possible initialization.
 SupabaseClient get supabaseClient => Supabase.instance.client;
 
-class MesobAPP extends StatelessWidget {
+// navigator key so we can push from auth listener
+final GlobalKey<NavigatorState> appNavigatorKey = GlobalKey<NavigatorState>();
+
+class MesobAPP extends ConsumerStatefulWidget {
   const MesobAPP({super.key});
+
+  @override
+  ConsumerState<MesobAPP> createState() => _MesobAPPState();
+}
+
+class _MesobAPPState extends ConsumerState<MesobAPP> {
+  StreamSubscription<AuthState>? _authSub;
+
+  @override
+  void initState() {
+    super.initState();
+    // Listen to Supabase auth state changes
+    _authSub = Supabase.instance.client.auth.onAuthStateChange.listen((event) {
+      final authEvent = event.event;
+      if (authEvent == AuthChangeEvent.passwordRecovery) {
+        // Navigate to new-password route
+        appNavigatorKey.currentState?.pushReplacementNamed('/new-password');
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _authSub?.cancel();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      navigatorKey: appNavigatorKey,
       title: 'Mesob foods',
       theme: ThemeData(fontFamily: 'Poppins'),
       debugShowCheckedModeBanner: false,
@@ -72,6 +104,7 @@ class MesobAPP extends StatelessWidget {
         '/search_page': (context) => const SearchPage(),
         '/cart_page': (context) => const CartPage(),
         '/settings_page': (context) => const AppSettings(),
+        '/new-password': (context) => const NewPasswordPage(),
       },
     );
   }

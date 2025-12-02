@@ -75,115 +75,117 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20.0),
-        child: Column(
-          children: [
-            const SizedBox(height: 10),
-            // Hero area / illustration
-            Container(
-              height: 220,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                color: const Color(0xff162236),
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(16),
-                child: Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    // SVG as a widget behind the content (scaled up)
-                    Opacity(
-                      opacity: 0.6,
-                      child: Transform.scale(
-                        scale:
-                            1.2, // increase this value (e.g. 1.3) to make SVG larger
-                        alignment: Alignment.center,
-                        child: SvgPicture.asset(
-                          'assets/images/illustrations/howitworks.svg',
-                          fit: BoxFit.cover,
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              const SizedBox(height: 30),
+              // Hero area / illustration
+              Container(
+                height: 280,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: const Color(0xff162236),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(16),
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      // SVG as a widget behind the content (scaled up)
+                      Opacity(
+                        opacity: 0.6,
+                        child: Transform.scale(
+                          scale:
+                              1.2, // increase this value (e.g. 1.3) to make SVG larger
+                          alignment: Alignment.center,
+                          child: SvgPicture.asset(
+                            'assets/images/illustrations/howitworks.svg',
+                            fit: BoxFit.cover,
+                          ),
                         ),
                       ),
-                    ),
-                    const Center(
-                      child: Text(
-                        'Forgot password?',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 26,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 24),
-            const Text(
-              'Enter your email address and we will send a link to reset your password.',
-              style: TextStyle(color: Colors.white70),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 18),
-            TextField(
-              controller: _emailController,
-              keyboardType: TextInputType.emailAddress,
-              style: const TextStyle(color: Colors.white),
-              decoration: InputDecoration(
-                filled: true,
-                fillColor: const Color(0xFF111827),
-                hintText: 'Email address',
-                hintStyle: const TextStyle(color: Colors.white38),
-                prefixIcon: const Icon(
-                  Icons.email_outlined,
-                  color: Colors.white70,
-                ),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  borderSide: BorderSide.none,
-                ),
-              ),
-            ),
-            const SizedBox(height: 20),
-            SizedBox(
-              width: double.infinity,
-              height: 50,
-              child: ElevatedButton(
-                onPressed: loading ? null : _submit,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xfff7B43f),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
+                      // const Center(
+                      //   child: Text(
+                      //     'Forgot password?',
+                      //     style: TextStyle(
+                      //       color: Colors.white,
+                      //       fontSize: 26,
+                      //       fontWeight: FontWeight.bold,
+                      //     ),
+                      //   ),
+                      // ),
+                    ],
                   ),
                 ),
-                child: loading
-                    ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(
-                          color: Colors.black,
-                          strokeWidth: 2,
-                        ),
-                      )
-                    : const Text(
-                        'Send reset link',
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
               ),
-            ),
-            const SizedBox(height: 12),
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text(
-                'Remembered your password? Sign in',
+              const SizedBox(height: 32),
+              const Text(
+                'Enter your email address and we will send a link to reset your password.',
                 style: TextStyle(color: Colors.white70),
+                textAlign: TextAlign.center,
               ),
-            ),
-          ],
+              const SizedBox(height: 28),
+              TextField(
+                controller: _emailController,
+                keyboardType: TextInputType.emailAddress,
+                style: const TextStyle(color: Colors.white),
+                decoration: InputDecoration(
+                  filled: true,
+                  fillColor: const Color(0xFF111827),
+                  hintText: 'Email address',
+                  hintStyle: const TextStyle(color: Colors.white38),
+                  prefixIcon: const Icon(
+                    Icons.email_outlined,
+                    color: Colors.white70,
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide.none,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 48),
+              SizedBox(
+                width: double.infinity,
+                height: 50,
+                child: ElevatedButton(
+                  onPressed: loading ? null : _submit,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xfff7B43f),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  child: loading
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            color: Colors.black,
+                            strokeWidth: 2,
+                          ),
+                        )
+                      : const Text(
+                          'Send reset link',
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                ),
+              ),
+              const SizedBox(height: 18),
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text(
+                  'Remembered your password? Sign in',
+                  style: TextStyle(color: Colors.white70),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
