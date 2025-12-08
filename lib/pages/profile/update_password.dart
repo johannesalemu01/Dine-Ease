@@ -4,21 +4,31 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:dine_ease/pages/login.dart';
 
-class NewPasswordPage extends StatefulWidget {
-  const NewPasswordPage({super.key});
+class UpdatePasswordPage extends StatefulWidget {
+  const UpdatePasswordPage({super.key});
 
   @override
-  State<NewPasswordPage> createState() => _NewPasswordPageState();
+  State<UpdatePasswordPage> createState() => _UpdatePasswordPageState();
 }
 
-class _NewPasswordPageState extends State<NewPasswordPage> {
-  final TextEditingController _password = TextEditingController();
-  final TextEditingController _confirm = TextEditingController();
+class _UpdatePasswordPageState extends State<UpdatePasswordPage> {
   final _formKey = GlobalKey<FormState>();
+  final TextEditingController _old = TextEditingController();
+  final TextEditingController _new = TextEditingController();
+  final TextEditingController _confirm = TextEditingController();
   bool _loading = false;
-  bool _obscurePass = true;
+  bool _obscureOld = true;
+  bool _obscureNew = true;
   bool _obscureConfirm = true;
   double _strength = 0.0;
+
+  @override
+  void dispose() {
+    _old.dispose();
+    _new.dispose();
+    _confirm.dispose();
+    super.dispose();
+  }
 
   int _computeStrength(String p) {
     var score = 0;
@@ -33,7 +43,7 @@ class _NewPasswordPageState extends State<NewPasswordPage> {
   Color _strengthColor(double s) {
     if (s < 0.4) return Colors.redAccent;
     if (s < 0.7) return Colors.orangeAccent;
-    return const Color.fromARGB(255, 29, 144, 94); // green
+    return const Color.fromARGB(255, 29, 144, 94);
   }
 
   String _strengthLabel(double s) {
@@ -42,105 +52,129 @@ class _NewPasswordPageState extends State<NewPasswordPage> {
     return 'Strong';
   }
 
-  void _onPasswordChanged(String v) {
+  void _onNewChanged(String v) {
     final score = _computeStrength(v);
-    setState(() {
-      _strength = (score / 5);
-    });
+    setState(() => _strength = (score / 5));
   }
 
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
 
-    final pass = _password.text.trim();
+    final supabase = Supabase.instance.client;
+    final user = supabase.auth.currentUser;
+    if (user == null || user.email == null) {
+      Fluttertoast.showToast(
+        msg: 'No authenticated user found.',
+        backgroundColor: Colors.red.shade700,
+        textColor: Colors.white,
+      );
+      return;
+    }
+
+    final oldPass = _old.text.trim();
+    final newPass = _new.text.trim();
 
     setState(() => _loading = true);
+
     try {
-      final res = await Supabase.instance.client.auth.updateUser(
-        UserAttributes(password: pass),
+      // Re-authenticate by signing in with current email + old password.
+      final signInRes = await supabase.auth.signInWithPassword(
+        email: user.email!,
+        password: oldPass,
       );
 
-      // Inspect response for errors
+      // Check for errors on sign-in
       try {
-        final dyn = res as dynamic;
-        final error = dyn.error ?? dyn['error'];
-        if (error != null) {
-          final msg = error.message ?? error.toString();
-          if (mounted) {
-            Fluttertoast.showToast(
-              msg: msg,
-              gravity: ToastGravity.TOP,
-              backgroundColor: Colors.red.shade700,
-              textColor: Colors.white,
-            );
-          }
-          return;
+        final dyn = signInRes as dynamic;
+        final respError = dyn.error ?? dyn['error'];
+        if (respError != null) {
+          final msg = respError.message ?? respError.toString();
+          throw Exception(msg);
+        }
+      } catch (_) {
+        // ignore parsing
+      }
+
+      // If sign-in didn't produce a current user, fail
+      final reAuthUser = supabase.auth.currentUser;
+      if (reAuthUser == null) {
+        throw Exception(
+          'Re-authentication failed. Old password may be incorrect.',
+        );
+      }
+
+      // Update password
+      final updateRes = await supabase.auth.updateUser(
+        UserAttributes(password: newPass),
+      );
+
+      // Inspect update response for an error
+      try {
+        final dyn = updateRes as dynamic;
+        final updErr = dyn.error ?? dyn['error'];
+        if (updErr != null) {
+          final msg = updErr.message ?? updErr.toString();
+          throw Exception(msg);
         }
       } catch (_) {}
 
-      // polished success feedback
-      if (mounted) {
-        await showDialog(
-          context: context,
-          builder: (_) => AlertDialog(
-            backgroundColor: const Color(0xff162236),
-            title: const Text(
-              'Password updated',
-              style: TextStyle(color: Colors.white),
-            ),
-            content: const Text(
-              'Your password has been updated. Please sign in again.',
-              style: TextStyle(color: Colors.white70),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text('OK'),
-              ),
-            ],
+      // On success, show dialog and require sign in again
+      if (!mounted) return;
+      await showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+          backgroundColor: const Color(0xff162236),
+          title: const Text(
+            'Password Updated',
+            style: TextStyle(color: Colors.white),
           ),
-        );
+          content: const Text(
+            'Your password was updated. For security, please sign in again with your new password.',
+            style: TextStyle(color: Colors.white70),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('OK'),
+            ),
+          ],
+        ),
+      );
 
-        Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(builder: (_) => const Login()),
-          (r) => false,
-        );
-      }
+      // Sign out to force re-login
+      await supabase.auth.signOut();
+
+      if (!mounted) return;
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (_) => const Login()),
+        (route) => false,
+      );
     } catch (e, st) {
-      if (kDebugMode) debugPrint('NewPassword error: $e\n$st');
-      if (mounted) {
-        Fluttertoast.showToast(
-          msg: e.toString(),
-          gravity: ToastGravity.TOP,
-          backgroundColor: Colors.red.shade700,
-          textColor: Colors.white,
-        );
-      }
+      if (kDebugMode) debugPrint('UpdatePasswordPage error: $e\n$st');
+      final msg = (e is Exception)
+          ? e.toString().replaceFirst('Exception: ', '')
+          : e.toString();
+      Fluttertoast.showToast(
+        msg: msg,
+        backgroundColor: Colors.red.shade700,
+        textColor: Colors.white,
+      );
     } finally {
       if (mounted) setState(() => _loading = false);
     }
   }
 
   @override
-  void dispose() {
-    _password.dispose();
-    _confirm.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    // Styled to match app's dark UI
     return Scaffold(
       backgroundColor: const Color(0xFF0E131E),
       appBar: AppBar(
-        centerTitle: true,
         backgroundColor: Colors.transparent,
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.white),
         title: const Text(
-          'Set New Password',
+          'Change password',
           style: TextStyle(color: Colors.white),
         ),
       ),
@@ -153,29 +187,60 @@ class _NewPasswordPageState extends State<NewPasswordPage> {
               child: Form(
                 key: _formKey,
                 child: Column(
-                  // keep min size behavior but allow the column to fill vertically
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const SizedBox(height: 28),
                     const Text(
-                      'Create a Strong Password',
+                      'Update your password',
                       style: TextStyle(
                         color: Colors.white,
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600,
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 8),
                     const Text(
-                      'Choose a password you can remember but is hard for others to guess.',
+                      'Enter your current password, then choose a new secure password.',
                       style: TextStyle(color: Colors.white70),
                       textAlign: TextAlign.center,
                     ),
-                    const SizedBox(height: 48),
+                    const SizedBox(height: 18),
                     TextFormField(
-                      controller: _password,
-                      onChanged: _onPasswordChanged,
-                      obscureText: _obscurePass,
+                      controller: _old,
+                      obscureText: _obscureOld,
+                      style: const TextStyle(color: Colors.white),
+                      decoration: InputDecoration(
+                        filled: true,
+                        fillColor: const Color(0xFF0B1218),
+                        hintText: 'Current password',
+                        hintStyle: const TextStyle(color: Colors.white38),
+                        prefixIcon: const Icon(
+                          Icons.lock_open,
+                          color: Colors.white70,
+                        ),
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            _obscureOld
+                                ? Icons.visibility_outlined
+                                : Icons.visibility_off_outlined,
+                            color: Colors.white70,
+                          ),
+                          onPressed: () =>
+                              setState(() => _obscureOld = !_obscureOld),
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: BorderSide.none,
+                        ),
+                      ),
+                      validator: (v) => (v == null || v.isEmpty)
+                          ? 'Enter current password'
+                          : null,
+                    ),
+                    const SizedBox(height: 12),
+                    TextFormField(
+                      controller: _new,
+                      onChanged: _onNewChanged,
+                      obscureText: _obscureNew,
                       style: const TextStyle(color: Colors.white),
                       decoration: InputDecoration(
                         filled: true,
@@ -188,13 +253,13 @@ class _NewPasswordPageState extends State<NewPasswordPage> {
                         ),
                         suffixIcon: IconButton(
                           icon: Icon(
-                            _obscurePass
+                            _obscureNew
                                 ? Icons.visibility_outlined
                                 : Icons.visibility_off_outlined,
                             color: Colors.white70,
                           ),
                           onPressed: () =>
-                              setState(() => _obscurePass = !_obscurePass),
+                              setState(() => _obscureNew = !_obscureNew),
                         ),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
@@ -209,8 +274,7 @@ class _NewPasswordPageState extends State<NewPasswordPage> {
                         return null;
                       },
                     ),
-                    const SizedBox(height: 12),
-                    // strength meter
+                    const SizedBox(height: 8),
                     Row(
                       children: [
                         Expanded(
@@ -231,7 +295,7 @@ class _NewPasswordPageState extends State<NewPasswordPage> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 28),
+                    const SizedBox(height: 12),
                     TextFormField(
                       controller: _confirm,
                       obscureText: _obscureConfirm,
@@ -239,7 +303,7 @@ class _NewPasswordPageState extends State<NewPasswordPage> {
                       decoration: InputDecoration(
                         filled: true,
                         fillColor: const Color(0xFF0B1218),
-                        hintText: 'Confirm password',
+                        hintText: 'Confirm new password',
                         hintStyle: const TextStyle(color: Colors.white38),
                         prefixIcon: const Icon(
                           Icons.check,
@@ -263,13 +327,12 @@ class _NewPasswordPageState extends State<NewPasswordPage> {
                       ),
                       validator: (v) {
                         if (v == null || v.isEmpty)
-                          return 'Confirm your password';
-                        if (v != _password.text)
-                          return 'Passwords do not match';
+                          return 'Confirm your new password';
+                        if (v != _new.text) return 'Passwords do not match';
                         return null;
                       },
                     ),
-                    const SizedBox(height: 38),
+                    const SizedBox(height: 22),
                     SizedBox(
                       width: double.infinity,
                       height: 50,
@@ -297,14 +360,6 @@ class _NewPasswordPageState extends State<NewPasswordPage> {
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    TextButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: const Text(
-                        'Back to sign in',
-                        style: TextStyle(color: Colors.white70),
                       ),
                     ),
                     const SizedBox(height: 12),

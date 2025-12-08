@@ -301,6 +301,21 @@ class AuthRepository {
       }
     }
   }
+
+// final supabase = Supabase.instance.client;
+
+Future<void> changePassword(String newPassword) async {
+  final user = _supabase.auth.currentUser;
+  if (user == null) {
+    throw Exception("Not logged in");
+  }
+
+  await _supabase.auth.updateUser(
+    UserAttributes(password: newPassword),
+  );
+}
+
+
 }
 
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
