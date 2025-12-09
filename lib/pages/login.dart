@@ -153,19 +153,17 @@ class _LoginState extends ConsumerState<Login> {
                       decoration: const InputDecoration(
                         hintText: 'email address',
                         hintStyle: TextStyle(color: Colors.black26),
-                        prefixIcon: SizedBox(
-                          height: 10,
-                          width: 10,
-                          child: Align(
-                            alignment: Alignment.centerLeft,
-                            child: Icon(
-                              Icons.email_outlined,
-                              color: Color.fromARGB(205, 0, 0, 0),
-                              size: 25,
-                            ),
-                          ),
+
+                        // Center text vertically
+                        contentPadding: EdgeInsets.symmetric(vertical: 16),
+
+                        prefixIcon: Icon(
+                          Icons.email_outlined,
+                          color: Color.fromARGB(205, 0, 0, 0),
+                          size: 25,
                         ),
-                        disabledBorder: InputBorder.none,
+
+                        border: InputBorder.none,
                         enabledBorder: InputBorder.none,
                         focusedBorder: InputBorder.none,
                       ),
@@ -188,18 +186,15 @@ class _LoginState extends ConsumerState<Login> {
                       decoration: InputDecoration(
                         hintText: 'password',
                         hintStyle: const TextStyle(color: Colors.black26),
-                        prefixIcon: const SizedBox(
-                          height: 10,
-                          width: 10,
-                          child: Align(
-                            alignment: Alignment.centerLeft,
-                            child: Icon(
-                              Icons.lock_outline_rounded,
-                              color: Color.fromARGB(205, 0, 0, 0),
-                              size: 25,
-                            ),
-                          ),
+                        contentPadding: const EdgeInsets.symmetric(
+                          vertical: 16,
                         ),
+                        prefixIcon: const Icon(
+                          Icons.lock_outline_rounded,
+                          color: Color.fromARGB(205, 0, 0, 0),
+                          size: 25,
+                        ),
+                        border: InputBorder.none,
                         disabledBorder: InputBorder.none,
                         enabledBorder: InputBorder.none,
                         focusedBorder: InputBorder.none,
