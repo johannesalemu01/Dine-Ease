@@ -1,327 +1,332 @@
 import 'package:dine_ease/providers/auth/auth_controller.dart';
+import 'package:dine_ease/providers/supabase_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:dine_ease/pages/login.dart';
 import 'package:dine_ease/pages/profile/loyality_points.dart';
 import 'package:dine_ease/pages/profile/personal_info.dart';
 import 'package:dine_ease/pages/profile/refer_friend.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-// import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class ProfilePage extends ConsumerStatefulWidget {
   const ProfilePage({super.key});
-
   @override
   ConsumerState<ProfilePage> createState() => _ProfilePageState();
 }
 
 class _ProfilePageState extends ConsumerState<ProfilePage> {
+  String? _profileUsername;
+  bool _loadingProfile = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadProfile();
+  }
+
+  Future<void> _loadProfile() async {
+    try {
+      final supabase = ref.read(supabaseProvider);
+      final user = supabase.auth.currentUser;
+      if (user == null) {
+        setState(() {
+          _profileUsername = null;
+          _loadingProfile = false;
+        });
+        return;
+      }
+
+      // Query the profiles table for the username (adjust column name if different)
+      final res = await supabase
+          .from('profiles')
+          .select('full_name')
+          .eq('id', user.id)
+          .maybeSingle();
+
+      String? name;
+      try {
+        final dyn = res as dynamic;
+
+        final data = dyn.data ?? dyn;
+        if (kDebugMode) {
+          try {
+            debugPrint('Profile query raw response: $res');
+            debugPrint('Profile parsed data: $data');
+          } catch (e) {
+            debugPrint('Failed to debugPrint profile response: $e');
+          }
+        }
+        if (data is Map && data['full_name'] != null) {
+          name = data['full_name'] as String;
+        } else if (dyn is Map && dyn['full_name'] != null) {
+          name = dyn['full_name'] as String;
+        }
+      } catch (_) {
+        // ignore parsing errors
+      }
+
+      setState(() {
+        _profileUsername = name;
+        _loadingProfile = false;
+      });
+    } catch (e) {
+      if (kDebugMode) debugPrint('Profile load error: $e');
+      setState(() {
+        _profileUsername = null;
+        _loadingProfile = false;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    double height = MediaQuery.of(context).size.height;
-    int rewardPoints = 0;
+    final user = ref.watch(supabaseProvider).auth.currentUser;
+
+    // keep layout consistent with other pages: dark background, card-like content area
+    const themeBg = Color.fromARGB(255, 11, 23, 36);
+    const headerBg = Color.fromARGB(255, 15, 31, 48);
+    const textWhite = Colors.white;
+    const textMuted = Colors.white70;
+    // placeholder values; replace with real user data if available
+    final userEmail = user?.email ?? 'jo@gmail.com';
+    final displayName = _loadingProfile
+        ? 'Loading...'
+        : (_profileUsername ??
+              (userEmail.contains('@') ? userEmail.split('@').first : 'User'));
+    const rewardPoints = 0;
+
     return Scaffold(
+      backgroundColor: headerBg,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        title: const Text('Profile'),
+        centerTitle: true,
+      ),
       body: SingleChildScrollView(
-        physics: const ClampingScrollPhysics(),
-        child: Container(
-          width: double.infinity,
-          height: height * 1.1,
-          decoration: const BoxDecoration(
-            color: Color.fromARGB(255, 15, 31, 48),
-          ),
-          child: Column(
-            children: [
-              const SizedBox(height: 60),
-              SizedBox(
-                height: height / 5,
-                child: const Center(
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 10.0),
-                    child: Row(
+        child: Column(
+          children: [
+            // top user header
+            Container(
+              width: double.infinity,
+              color: headerBg,
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+              child: Row(
+                children: [
+                  const CircleAvatar(
+                    radius: 42,
+                    backgroundImage: AssetImage('assets/images/mesob.png'),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        CircleAvatar(
-                          // backgroundColor: Color.fromARGB(255, 255, 132, 0),
-                          backgroundImage: AssetImage(
-                            'assets/images/mesob.png',
+                        Text(
+                          displayName,
+                          style: const TextStyle(
+                            color: textWhite,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
                           ),
-                          radius: 45,
-                          // child: Image.asset('assets/images/mesob.png'),
-                          // child: Text(
-                          //   'j',
-                          //   style: TextStyle(
-                          //       color: Colors.white,
-                          //       fontWeight: FontWeight.w500,
-                          //       fontSize: 42),
-                          // ),
                         ),
-                        SizedBox(width: 8),
-                        Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              'Yohannes Alemu',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 20,
-                              ),
-                            ),
-                            Text(
-                              'jo@gmail.com',
-                              style: TextStyle(color: Colors.white54),
-                            ),
-                          ],
+                        const SizedBox(height: 4),
+                        Text(
+                          userEmail,
+                          style: const TextStyle(
+                            color: textMuted,
+                            fontSize: 14,
+                          ),
                         ),
-                        Spacer(),
-                        Icon(Icons.edit_note, color: Colors.white60, size: 30),
                       ],
                     ),
                   ),
-                ),
+                  IconButton(
+                    onPressed: () {
+                      // navigate to edit profile (if implemented)
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const PersonalInformation(),
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.edit_note, color: Colors.white70),
+                  ),
+                ],
               ),
-              Expanded(
-                child: Container(
-                  width: double.infinity,
-                  decoration: const BoxDecoration(
-                    color: Color.fromARGB(255, 11, 23, 36),
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(20),
-                      topRight: Radius.circular(20),
+            ),
+
+            // content area
+            Container(
+              width: double.infinity,
+              decoration: const BoxDecoration(
+                color: themeBg,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+              ),
+              padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Rewards',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
                     ),
                   ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  const SizedBox(height: 12),
+                  GestureDetector(
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const LoyalityPoint()),
+                    ),
+                    child: const ProfileTile(
+                      labelText: 'Loyalty Points',
+                      icon: Icons.loyalty_rounded,
+                      trailingText: '$rewardPoints points',
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  GestureDetector(
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const ReferFriend()),
+                    ),
+                    child: const ProfileTile(
+                      labelText: 'Refer a friend',
+                      icon: Icons.person_add_alt_1_outlined,
+                    ),
+                  ),
+
+                  const SizedBox(height: 20),
+                  const Text(
+                    'Your Activity',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  const ProfileTile(labelText: 'History', icon: Icons.history),
+
+                  const SizedBox(height: 20),
+                  const Text(
+                    'TheMosob Pay',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  const ProfileTile(labelText: 'Payment', icon: Icons.payments),
+
+                  const SizedBox(height: 20),
+                  const Text(
+                    'Settings',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  GestureDetector(
+                    onTap: () => Navigator.pushNamed(context, '/settings_page'),
+                    child: const ProfileTile(
+                      labelText: 'App settings',
+                      icon: Icons.settings,
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+
+                  // logout row
+                  Row(
                     children: [
-                      //activity
-                      Container(
-                        padding: const EdgeInsets.all(16),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              'Rewards',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: () async {
+                            final controller = ref.read(
+                              authControllerProvider.notifier,
+                            );
+                            await controller.logout();
+                            if (!mounted) return;
+                            Navigator.pushAndRemoveUntil(
+                              context,
+                              MaterialPageRoute(builder: (_) => const Login()),
+                              (route) => false,
+                            );
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            decoration: BoxDecoration(
+                              color: Colors.deepOrange,
+                              borderRadius: BorderRadius.circular(8),
                             ),
-                            GestureDetector(
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => const LoyalityPoint(),
-                                  ),
-                                );
-                              },
-                              child: ProfileTile(
-                                rewardPoints: rewardPoints,
-                                labelText: 'Loyalty Point',
-                                icon: Icons.loyalty_rounded,
-                              ),
+                            alignment: Alignment.center,
+                            child: const Text(
+                              'Log out',
+                              style: TextStyle(color: Colors.white),
                             ),
-                            GestureDetector(
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => const ReferFriend(),
-                                  ),
-                                );
-                              },
-                              child: const ProfileTile(
-                                labelText: 'Refer a friend',
-                                icon: Icons.person_add_alt_1_outlined,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Container(
-                        padding: const EdgeInsets.all(16),
-                        child: const Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Your Activity',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            ProfileTile(
-                              labelText: 'History',
-                              icon: Icons.history,
-                            ),
-                          ],
-                        ),
-                      ),
-                      Container(
-                        padding: const EdgeInsets.all(16),
-                        child: const Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'TheMosob Pay',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            ProfileTile(
-                              labelText: 'Payment',
-                              icon: Icons.payments,
-                            ),
-                          ],
-                        ),
-                      ),
-                      Container(
-                        padding: const EdgeInsets.all(16),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              'About You',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            GestureDetector(
-                              onTap: () => Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) =>
-                                      const PersonalInformation(),
-                                ),
-                              ),
-                              child: const ProfileTile(
-                                labelText: 'personal details',
-                                icon: Icons.person_outline_outlined,
-                              ),
-                            ),
-                            const SizedBox(height: 5),
-                            GestureDetector(
-                              onTap: () => Navigator.pushNamed(
-                                context,
-                                '/settings_page',
-                              ),
-                              child: const ProfileTile(
-                                labelText: 'Settings',
-                                icon: Icons.settings,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Container(
-                        padding: const EdgeInsets.all(16),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              'Help center',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            const ProfileTile(
-                              labelText: 'Get support',
-                              icon: Icons.help_outline,
-                            ),
-                            const SizedBox(height: 20),
-                            SizedBox(
-                              child: GestureDetector(
-                                onTap: () async {
-                                  final controller = ref.read(
-                                    authControllerProvider.notifier,
-                                  );
-                                  await controller.logout();
-                                  // navigate to Login and clear back stack so user can't go back
-                                  if (!mounted) return;
-                                  Navigator.pushAndRemoveUntil(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (_) => const Login(),
-                                    ),
-                                    (route) => false,
-                                  );
-                                },
-                                child: const Text(
-                                  'Log out',
-                                  style: TextStyle(color: Colors.deepOrange),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 30),
-                            const Align(
-                              child: Text(
-                                '1.0.00',
-                                style: TextStyle(color: Colors.white54),
-                              ),
-                            ),
-                          ],
+                          ),
                         ),
                       ),
                     ],
                   ),
-                ),
+
+                  const SizedBox(height: 18),
+                  const Center(
+                    child: Text(
+                      'App version 1.0.0',
+                      style: TextStyle(color: Colors.white54),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                ],
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
   }
 }
 
+// Small reusable tile to match other pages' simple layout
 class ProfileTile extends StatelessWidget {
   const ProfileTile({
     super.key,
-    this.rewardPoints,
+    this.trailingText,
     required this.labelText,
     required this.icon,
   });
 
-  final int? rewardPoints;
   final String labelText;
   final IconData icon;
+  final String? trailingText;
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        const SizedBox(height: 15),
-        Row(
-          children: [
-            Icon(icon, size: 22, color: Colors.white70),
-            const SizedBox(width: 12),
-            Text(
-              labelText,
-              style: const TextStyle(color: Colors.white70, fontSize: 13),
-            ),
-            const Spacer(),
-            if (rewardPoints != null)
-              Container(
-                padding: const EdgeInsets.all(4),
-                decoration: BoxDecoration(
-                  color: const Color.fromARGB(222, 255, 86, 34),
-                  borderRadius: BorderRadius.circular(18),
-                ),
-                child: Text(
-                  '$rewardPoints points',
-                  style: const TextStyle(color: Colors.white),
-                ),
-              ),
-            const Icon(Icons.chevron_right, color: Colors.white, size: 20),
-          ],
-        ),
-      ],
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 12),
+      child: Row(
+        children: [
+          Icon(icon, color: Colors.white70),
+          const SizedBox(width: 12),
+          Text(
+            labelText,
+            style: const TextStyle(color: Colors.white70, fontSize: 14),
+          ),
+          const Spacer(),
+          if (trailingText != null)
+            Text(trailingText!, style: const TextStyle(color: Colors.white70)),
+          const SizedBox(width: 8),
+          const Icon(Icons.chevron_right, color: Colors.white24),
+        ],
+      ),
     );
   }
 }

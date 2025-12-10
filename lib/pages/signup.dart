@@ -199,6 +199,7 @@ class _SignUpState extends ConsumerState<SignUp> {
                     decoration: const InputDecoration(
                       hintText: 'username',
                       hintStyle: TextStyle(color: Colors.black26),
+                      contentPadding: EdgeInsets.symmetric(vertical: 16),
                       prefixIcon: SizedBox(
                         height: 10,
                         width: 10,
@@ -232,6 +233,7 @@ class _SignUpState extends ConsumerState<SignUp> {
                     decoration: const InputDecoration(
                       hintText: 'email',
                       hintStyle: TextStyle(color: Colors.black26),
+                       contentPadding: EdgeInsets.symmetric(vertical: 16),
                       prefixIcon: SizedBox(
                         height: 10,
                         width: 10,
@@ -265,6 +267,7 @@ class _SignUpState extends ConsumerState<SignUp> {
                     decoration: const InputDecoration(
                       hintText: 'phone ',
                       hintStyle: TextStyle(color: Colors.black26),
+                       contentPadding: EdgeInsets.symmetric(vertical: 16),
                       prefixIcon: SizedBox(
                         height: 10,
                         width: 10,
@@ -298,6 +301,7 @@ class _SignUpState extends ConsumerState<SignUp> {
                     decoration: const InputDecoration(
                       hintText: 'password',
                       hintStyle: TextStyle(color: Colors.black26),
+                       contentPadding: EdgeInsets.symmetric(vertical: 16),
                       prefixIcon: SizedBox(
                         height: 10,
                         width: 10,
@@ -316,7 +320,7 @@ class _SignUpState extends ConsumerState<SignUp> {
                     ),
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 16),
                 Container(
                   height: 50,
                   width: double.infinity,

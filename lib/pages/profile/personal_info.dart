@@ -1,200 +1,324 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 
-class PersonalInformation extends StatelessWidget {
+class PersonalInformation extends StatefulWidget {
   const PersonalInformation({super.key});
 
   @override
+  State<PersonalInformation> createState() => _PersonalInformationState();
+}
+
+class _PersonalInformationState extends State<PersonalInformation> {
+  final _formKey = GlobalKey<FormState>();
+  String? _title = 'Mr.';
+  final TextEditingController _firstName = TextEditingController(
+    text: 'Yohannes',
+  );
+  final TextEditingController _lastName = TextEditingController(text: 'Alemu');
+  final TextEditingController _email = TextEditingController(
+    text: 'jo@gmail.com',
+  );
+  DateTime? _dob;
+
+  @override
+  void dispose() {
+    _firstName.dispose();
+    _lastName.dispose();
+    _email.dispose();
+    super.dispose();
+  }
+
+  Future<void> _pickDob() async {
+    final now = DateTime.now();
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _dob ?? DateTime(now.year - 25, now.month, now.day),
+      firstDate: DateTime(1900),
+      lastDate: now,
+      builder: (ctx, child) =>
+          Theme(data: Theme.of(context), child: child ?? const SizedBox()),
+    );
+    if (picked != null) setState(() => _dob = picked);
+  }
+
+  void _save() {
+    if (!_formKey.currentState!.validate()) return;
+    // TODO: persist changes via your repository/controller
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('Profile saved')));
+  }
+
+  @override
   Widget build(BuildContext context) {
+    const pageBg = Color.fromARGB(255, 10, 24, 39);
+    const cardBg = Color.fromARGB(255, 11, 23, 36);
+    const accent = Color.fromARGB(255, 29, 144, 94);
+
     return Scaffold(
+      backgroundColor: pageBg,
       appBar: AppBar(
-        title: const Text(
-          'Personl Information',
-          style: TextStyle(fontSize: 18, color: Colors.white),
-        ),
-        foregroundColor: Colors.white,
-        backgroundColor: const Color.fromARGB(255, 10, 24, 39),
+        title: const Text('Personal Information'),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        centerTitle: true,
       ),
-      backgroundColor: const Color.fromARGB(255, 10, 24, 39),
-      body: Center(
-        child: Column(
-          children: [
-            const SizedBox(
-              height: 50,
-            ),
-            const CircleAvatar(
-              backgroundColor: Color.fromARGB(255, 255, 132, 0),
-              radius: 30,
-              child: Text('J',
-                  style: TextStyle(color: Colors.white, fontSize: 32)),
-            ),
-            const SizedBox(
-              height: 8,
-            ),
-            const Text(
-              'Johannes Alemu',
-              style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w500,
-                  fontSize: 18),
-            ),
-            const SizedBox(
-              height: 20,
-            ),
-            Expanded(
-              child: Container(
-                decoration: const BoxDecoration(
-                  color: Colors.black38,
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(30),
-                    topRight: Radius.circular(30),
-                  ),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+          child: Column(
+            children: [
+              // avatar + basic info
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 14,
                 ),
-                child: const Form(
-                    child: Padding(
-                  padding: EdgeInsets.all(15),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      SizedBox(
-                        height: 20,
+                child: Row(
+                  children: [
+                    const CircleAvatar(
+                      radius: 36,
+                      backgroundImage: AssetImage('assets/images/mesob.png'),
+                    ),
+                    const SizedBox(width: 14),
+                    const Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Yohannes Alemu',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          SizedBox(height: 4),
+                          Text(
+                            'jo@gmail.com',
+                            style: TextStyle(color: Colors.white70),
+                          ),
+                        ],
                       ),
-                      SizedBox(
-                        width: 100,
-                        child: TextField(
-                          showCursor: false,
-                          decoration: InputDecoration(
-                            suffix: ExpansionTile(
-                              collapsedIconColor:
-                                  Color.fromARGB(255, 29, 144, 94),
-                              backgroundColor: Color.fromARGB(255, 51, 68, 56),
-                              title: Text(''),
-                              iconColor: Color.fromARGB(255, 29, 144, 94),
-                              children: [
-                                Text(
-                                  'Mr.',
-                                  style: TextStyle(color: Colors.white),
+                    ),
+                    IconButton(
+                      onPressed: () {},
+                      icon: const Icon(
+                        Icons.camera_alt_outlined,
+                        color: Colors.white70,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 12),
+
+              // form card
+              Container(
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  color: cardBg,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                padding: const EdgeInsets.all(16),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    children: [
+                      // Title dropdown
+                      Row(
+                        children: [
+                          Expanded(
+                            child: DropdownButtonFormField<String>(
+                              value: _title,
+                              dropdownColor: cardBg,
+                              decoration: InputDecoration(
+                                labelText: 'Title',
+                                labelStyle: const TextStyle(
+                                  color: Colors.white70,
                                 ),
-                                Text(
-                                  'Mrs',
-                                  style: TextStyle(color: Colors.white),
+                                filled: true,
+                                fillColor: const Color(0xFF0B1218),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                  borderSide: BorderSide.none,
+                                ),
+                              ),
+                              items: const [
+                                DropdownMenuItem(
+                                  value: 'Mr.',
+                                  child: Text(
+                                    'Mr.',
+                                    style: TextStyle(
+                                      color: Color.fromARGB(234, 255, 255, 255),
+                                    ),
+                                  ),
+                                ),
+                                DropdownMenuItem(
+                                  value: 'Mrs.',
+                                  child: Text(
+                                    'Mrs.',
+                                    style: TextStyle(
+                                      color: Color.fromARGB(234, 255, 255, 255),
+                                    ),
+                                  ),
+                                ),
+                                DropdownMenuItem(
+                                  value: 'Ms.',
+                                  child: Text(
+                                    'Ms.',
+                                    style: TextStyle(
+                                      color: Color.fromARGB(234, 255, 255, 255),
+                                    ),
+                                  ),
                                 ),
                               ],
+                              onChanged: (v) => setState(() => _title = v),
                             ),
-                            label: Text(
-                              'Title',
-                              style: TextStyle(color: Colors.white),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderSide: BorderSide(
-                                color: Color.fromARGB(255, 29, 144, 94),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+
+                      // First name
+                      TextFormField(
+                        controller: _firstName,
+                        style: const TextStyle(color: Colors.white),
+                        decoration: InputDecoration(
+                          labelText: 'First name',
+                          labelStyle: const TextStyle(color: Colors.white70),
+                          filled: true,
+                          fillColor: const Color(0xFF0B1218),
+                          prefixIcon: const Icon(
+                            Icons.person,
+                            color: Colors.white70,
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide: BorderSide.none,
+                          ),
+                        ),
+                        validator: (v) => (v == null || v.trim().isEmpty)
+                            ? 'Enter first name'
+                            : null,
+                      ),
+                      const SizedBox(height: 12),
+
+                      // Last name
+                      TextFormField(
+                        controller: _lastName,
+                        style: const TextStyle(color: Colors.white),
+                        decoration: InputDecoration(
+                          labelText: 'Last name',
+                          labelStyle: const TextStyle(color: Colors.white70),
+                          filled: true,
+                          fillColor: const Color(0xFF0B1218),
+                          prefixIcon: const Icon(
+                            Icons.person_outline,
+                            color: Colors.white70,
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide: BorderSide.none,
+                          ),
+                        ),
+                        validator: (v) => (v == null || v.trim().isEmpty)
+                            ? 'Enter last name'
+                            : null,
+                      ),
+                      const SizedBox(height: 12),
+
+                      // Email
+                      TextFormField(
+                        controller: _email,
+                        keyboardType: TextInputType.emailAddress,
+                        style: const TextStyle(color: Colors.white),
+                        decoration: InputDecoration(
+                          labelText: 'Email',
+                          labelStyle: const TextStyle(color: Colors.white70),
+                          filled: true,
+                          fillColor: const Color(0xFF0B1218),
+                          prefixIcon: const Icon(
+                            Icons.email_outlined,
+                            color: Colors.white70,
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide: BorderSide.none,
+                          ),
+                        ),
+                        validator: (v) {
+                          if (v == null || v.trim().isEmpty)
+                            return 'Enter email';
+                          final emailRegex = RegExp(
+                            r'^[^\s@]+@[^\s@]+\.[^\s@]+$',
+                          );
+                          return emailRegex.hasMatch(v.trim())
+                              ? null
+                              : 'Enter a valid email';
+                        },
+                      ),
+                      const SizedBox(height: 12),
+
+                      // DOB picker
+                      GestureDetector(
+                        onTap: _pickDob,
+                        child: AbsorbPointer(
+                          child: TextFormField(
+                            decoration: InputDecoration(
+                              labelText: 'Date of birth',
+                              labelStyle: const TextStyle(
+                                color: Colors.white70,
                               ),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderSide: BorderSide(
-                                color: Color.fromARGB(255, 29, 144, 94),
+                              filled: true,
+                              fillColor: const Color(0xFF0B1218),
+                              prefixIcon: const Icon(
+                                Icons.calendar_today,
+                                color: Colors.white70,
                               ),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8),
+                                borderSide: BorderSide.none,
+                              ),
+                              hintText: _dob == null
+                                  ? 'Select date'
+                                  : '${_dob!.year}-${_dob!.month.toString().padLeft(2, '0')}-${_dob!.day.toString().padLeft(2, '0')}',
                             ),
+                            validator: (v) =>
+                                _dob == null ? 'Select date of birth' : null,
                           ),
                         ),
                       ),
+
+                      const SizedBox(height: 18),
+
+                      // Save button
                       SizedBox(
-                        height: 20,
-                      ),
-                      TextField(
-                        style: TextStyle(color: Colors.white70, height: 0.7),
-                        cursorColor: Colors.white60,
-                        cursorHeight: 18,
-                        decoration: InputDecoration(
-                          label: Text(
-                            'first name',
-                            style: TextStyle(color: Colors.white54),
-                          ),
-                          // hintText: 'johannes',
-                          // hintStyle: TextStyle(color: Colors.white60),
-                          enabledBorder: OutlineInputBorder(
-                            borderSide: BorderSide(color: Colors.white60),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderSide: BorderSide(
-                              color: Color.fromARGB(255, 29, 144, 94),
+                        width: double.infinity,
+                        height: 48,
+                        child: ElevatedButton(
+                          onPressed: _save,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: accent,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
                             ),
                           ),
-                        ),
-                      ),
-                      SizedBox(
-                        height: 20,
-                      ),
-                      TextField(
-                        style: TextStyle(color: Colors.white70, height: 0.7),
-                        cursorColor: Colors.white60,
-                        cursorHeight: 18,
-                        decoration: InputDecoration(
-                          label: Text(
-                            'last name',
-                            style: TextStyle(color: Colors.white54),
-                          ),
-                          // hintText: 'Alemu',
-                          // hintStyle: TextStyle(color: Colors.white60),
-                          enabledBorder: OutlineInputBorder(
-                            borderSide: BorderSide(color: Colors.white60),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderSide: BorderSide(
-                              color: Color.fromARGB(255, 29, 144, 94),
-                            ),
-                          ),
-                        ),
-                      ),
-                      SizedBox(
-                        height: 20,
-                      ),
-                      TextField(
-                        style: TextStyle(color: Colors.white70, height: 0.7),
-                        cursorColor: Colors.white60,
-                        cursorHeight: 18,
-                        decoration: InputDecoration(
-                          label: Text(
-                            'email ',
-                            style: TextStyle(color: Colors.white54),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderSide: BorderSide(color: Colors.white60),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderSide: BorderSide(
-                              color: Color.fromARGB(255, 29, 144, 94),
-                            ),
-                          ),
-                        ),
-                      ),
-                      SizedBox(
-                        height: 15,
-                      ),
-                      TextField(
-                        style: TextStyle(color: Colors.white70, height: 0.7),
-                        cursorColor: Colors.white60,
-                        cursorHeight: 18,
-                        decoration: InputDecoration(
-                          labelText: 'Date of birth',
-                          hintStyle: TextStyle(color: Colors.white60),
-                          enabledBorder: OutlineInputBorder(
-                            borderSide: BorderSide(color: Colors.white60),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderSide: BorderSide(
-                              color: Color.fromARGB(255, 29, 144, 94),
+                          child: const Text(
+                            'Save',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
                         ),
                       ),
                     ],
                   ),
-                )),
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

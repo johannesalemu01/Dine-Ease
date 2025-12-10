@@ -33,7 +33,8 @@ class _BottomNavigationState extends State<BottomNavigation> {
         animationDuration: const Duration(milliseconds: 300),
         animationCurve: Curves.easeInOut,
         color: const Color.fromARGB(255, 17, 36, 55),
-        backgroundColor: const Color.fromARGB(148, 84, 60, 34),
+        // backgroundColor: const Color.fromARGB(148, 84, 60, 34),
+        backgroundColor: const Color.fromARGB(100, 235, 108, 69),
         onTap: (index) {
           setState(() {
             currentTabIndex = index;
