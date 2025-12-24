@@ -91,14 +91,17 @@ class _MesobAPPState extends ConsumerState<MesobAPP> {
   @override
   void initState() {
     super.initState();
-    // Listen to Supabase auth state changes
-    _authSub = Supabase.instance.client.auth.onAuthStateChange.listen((event) {
-      final authEvent = event.event;
-      if (authEvent == AuthChangeEvent.passwordRecovery) {
-        // Navigate to new-password route
-        appNavigatorKey.currentState?.pushReplacementNamed('/new-password');
-      }
-    });
+    // Listen to Supabase auth state changes (guarded for offline mode)
+    try {
+      _authSub = Supabase.instance.client.auth.onAuthStateChange.listen((event) {
+        final authEvent = event.event;
+        if (authEvent == AuthChangeEvent.passwordRecovery) {
+          appNavigatorKey.currentState?.pushReplacementNamed('/new-password');
+        }
+      });
+    } catch (e) {
+      debugPrint('⚠️ Could not attach Supabase auth listener: $e');
+    }
   }
 
   @override
