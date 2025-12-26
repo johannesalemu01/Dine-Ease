@@ -167,6 +167,31 @@ class _MapPageState extends ConsumerState<MapPage> {
               right: 20,
               child: _buildRestaurantCard(_selectedRestaurant!),
             ),
+          Positioned(
+            right: 20,
+            bottom: 100,
+            child: Column(
+              children: [
+                FloatingActionButton.small(
+                  backgroundColor: Colors.black,
+                  heroTag: 'zoom_in',
+                  child: const Icon(Icons.add, color: Colors.white),
+                  onPressed: () {
+                    _mapController.move(_mapController.camera.center, _mapController.camera.zoom + 1);
+                  },
+                ),
+                const SizedBox(height: 10),
+                FloatingActionButton.small(
+                  backgroundColor: Colors.black,
+                  heroTag: 'zoom_out',
+                  child: const Icon(Icons.remove, color: Colors.white),
+                  onPressed: () {
+                    _mapController.move(_mapController.camera.center, _mapController.camera.zoom - 1);
+                  },
+                ),
+              ],
+            ),
+          ),
           if (_isLoading)
             const Center(child: CircularProgressIndicator(color: Color(0xfff7B43f))),
         ],
