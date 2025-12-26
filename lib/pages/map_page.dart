@@ -72,6 +72,8 @@ class _MapPageState extends ConsumerState<MapPage> {
     );
   }
 
+  Restaurant? _selectedRestaurant;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -87,6 +89,7 @@ class _MapPageState extends ConsumerState<MapPage> {
             options: MapOptions(
               initialCenter: _initialPosition,
               initialZoom: 13,
+              onTap: (_, __) => setState(() => _selectedRestaurant = null),
             ),
             children: [
               TileLayer(
@@ -97,7 +100,7 @@ class _MapPageState extends ConsumerState<MapPage> {
                 attributions: [
                   TextSourceAttribution(
                     'OpenStreetMap contributors',
-                    onTap: () => {}, // TODO: Open OSM copyright page
+                    onTap: () => {},
                   ),
                 ],
               ),
@@ -115,18 +118,20 @@ class _MapPageState extends ConsumerState<MapPage> {
                       ),
                     ),
                   ..._nearbyRestaurants.map((r) {
+                    final isSelected = _selectedRestaurant?.id == r.id;
                     return Marker(
                       point: LatLng(r.lat ?? 0, r.lng ?? 0),
-                      width: 50,
-                      height: 50,
+                      width: isSelected ? 60 : 50,
+                      height: isSelected ? 60 : 50,
                       child: GestureDetector(
                         onTap: () {
-                          // TODO: Navigate to restaurant detail
+                          setState(() => _selectedRestaurant = r);
+                          _mapController.move(LatLng(r.lat!, r.lng!), 15);
                         },
-                        child: const Icon(
+                        child: Icon(
                           Icons.location_on,
-                          color: Color(0xfff7B43f),
-                          size: 40,
+                          color: isSelected ? Colors.red : const Color(0xfff7B43f),
+                          size: isSelected ? 50 : 40,
                         ),
                       ),
                     );
@@ -135,9 +140,70 @@ class _MapPageState extends ConsumerState<MapPage> {
               ),
             ],
           ),
+          if (_selectedRestaurant != null)
+            Positioned(
+              bottom: 20,
+              left: 20,
+              right: 20,
+              child: _buildRestaurantCard(_selectedRestaurant!),
+            ),
           if (_isLoading)
             const Center(child: CircularProgressIndicator(color: Color(0xfff7B43f))),
         ],
+      ),
+    );
+  }
+
+  Widget _buildRestaurantCard(Restaurant restaurant) {
+    return Card(
+      elevation: 8,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        height: 120,
+        child: Row(
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: Image.network(
+                restaurant.images.isNotEmpty ? restaurant.images[0] : 'https://via.placeholder.com/100',
+                width: 100,
+                height: 100,
+                fit: BoxFit.cover,
+                errorBuilder: (_, __, ___) => Container(color: Colors.grey, width: 100, height: 100),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    restaurant.name,
+                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  Text(restaurant.cuisine, style: TextStyle(color: Colors.grey[600], fontSize: 13)),
+                  const Spacer(),
+                  Row(
+                    children: [
+                      const Icon(Icons.star, color: Colors.amber, size: 16),
+                      Text(' ${restaurant.rating} (Found nearby)', style: const TextStyle(fontSize: 12)),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            IconButton(
+              icon: const Icon(Icons.arrow_forward_ios, size: 16),
+              onPressed: () {
+                // TODO: Navigate to detail
+              },
+            ),
+          ],
+        ),
       ),
     );
   }
