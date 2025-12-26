@@ -121,17 +121,37 @@ class _MapPageState extends ConsumerState<MapPage> {
                     final isSelected = _selectedRestaurant?.id == r.id;
                     return Marker(
                       point: LatLng(r.lat ?? 0, r.lng ?? 0),
-                      width: isSelected ? 60 : 50,
-                      height: isSelected ? 60 : 50,
+                      width: 80,
+                      height: 80,
                       child: GestureDetector(
                         onTap: () {
                           setState(() => _selectedRestaurant = r);
                           _mapController.move(LatLng(r.lat!, r.lng!), 15);
                         },
-                        child: Icon(
-                          Icons.location_on,
-                          color: isSelected ? Colors.red : const Color(0xfff7B43f),
-                          size: isSelected ? 50 : 40,
+                        child: AnimatedScale(
+                          scale: isSelected ? 1.2 : 1.0,
+                          duration: const Duration(milliseconds: 300),
+                          child: Column(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                decoration: BoxDecoration(
+                                  color: Colors.black,
+                                  borderRadius: BorderRadius.circular(10),
+                                  border: Border.all(color: const Color(0xfff7B43f), width: 1),
+                                ),
+                                child: Text(
+                                  '${r.rating} ⭐',
+                                  style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                              Icon(
+                                Icons.location_on,
+                                color: isSelected ? Colors.red : const Color(0xfff7B43f),
+                                size: 40,
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     );
