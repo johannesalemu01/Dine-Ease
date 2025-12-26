@@ -93,6 +93,14 @@ class _MapPageState extends ConsumerState<MapPage> {
                 urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                 userAgentPackageName: 'com.example.dine_ease',
               ),
+              RichAttributionWidget(
+                attributions: [
+                  TextSourceAttribution(
+                    'OpenStreetMap contributors',
+                    onTap: () => {}, // TODO: Open OSM copyright page
+                  ),
+                ],
+              ),
               MarkerLayer(
                 markers: [
                   if (_currentLocation != null)
