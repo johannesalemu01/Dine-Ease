@@ -1,8 +1,9 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:location/location.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong2.dart';
+import 'package:location/location.dart' as loc;
 import 'package:dine_ease/models/restaurant.dart';
 import 'package:dine_ease/providers/booking/booking_repository.dart';
 
@@ -14,15 +15,12 @@ class MapPage extends ConsumerStatefulWidget {
 }
 
 class _MapPageState extends ConsumerState<MapPage> {
-  final Completer<GoogleMapController> _controller = Completer<GoogleMapController>();
-  LocationData? _currentLocation;
+  final MapController _mapController = MapController();
+  loc.LocationData? _currentLocation;
   List<Restaurant> _nearbyRestaurants = [];
   bool _isLoading = true;
 
-  static const CameraPosition _initialPosition = CameraPosition(
-    target: LatLng(9.0306, 38.7468), // Default to Addis Ababa
-    zoom: 13,
-  );
+  static const LatLng _initialPosition = LatLng(9.0306, 38.7468); // Addis Ababa
 
   @override
   void initState() {
@@ -31,9 +29,9 @@ class _MapPageState extends ConsumerState<MapPage> {
   }
 
   Future<void> _initLocation() async {
-    final location = Location();
+    final location = loc.Location();
     bool serviceEnabled;
-    PermissionStatus permissionGranted;
+    loc.PermissionStatus permissionGranted;
 
     serviceEnabled = await location.serviceEnabled();
     if (!serviceEnabled) {
@@ -42,9 +40,9 @@ class _MapPageState extends ConsumerState<MapPage> {
     }
 
     permissionGranted = await location.hasPermission();
-    if (permissionGranted == PermissionStatus.denied) {
+    if (permissionGranted == loc.PermissionStatus.denied) {
       permissionGranted = await location.requestPermission();
-      if (permissionGranted != PermissionStatus.granted) return;
+      if (permissionGranted != loc.PermissionStatus.granted) return;
     }
 
     final currentLocation = await location.getLocation();
@@ -66,15 +64,12 @@ class _MapPageState extends ConsumerState<MapPage> {
     });
   }
 
-  Future<void> _animateToUser() async {
+  void _animateToUser() {
     if (_currentLocation == null) return;
-    final GoogleMapController controller = await _controller.future;
-    controller.animateCamera(CameraUpdate.newCameraPosition(
-      CameraPosition(
-        target: LatLng(_currentLocation!.latitude!, _currentLocation!.longitude!),
-        zoom: 15,
-      ),
-    ));
+    _mapController.move(
+      LatLng(_currentLocation!.latitude!, _currentLocation!.longitude!),
+      15,
+    );
   }
 
   @override
@@ -87,27 +82,50 @@ class _MapPageState extends ConsumerState<MapPage> {
       ),
       body: Stack(
         children: [
-          GoogleMap(
-            mapType: MapType.normal,
-            initialCameraPosition: _initialPosition,
-            myLocationEnabled: true,
-            myLocationButtonEnabled: true,
-            onMapCreated: (GoogleMapController controller) {
-              _controller.complete(controller);
-            },
-            markers: _nearbyRestaurants.map((r) {
-              return Marker(
-                markerId: MarkerId(r.id),
-                position: LatLng(r.lat ?? 0, r.lng ?? 0),
-                infoWindow: InfoWindow(
-                  title: r.name,
-                  snippet: '${r.cuisine} - ${r.rating} ⭐',
-                ),
-                onTap: () {
-                  // TODO: Navigate to restaurant detail
-                },
-              );
-            }).toSet(),
+          FlutterMap(
+            mapController: _mapController,
+            options: MapOptions(
+              initialCenter: _initialPosition,
+              initialZoom: 13,
+            ),
+            children: [
+              TileLayer(
+                urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                userAgentPackageName: 'com.example.dine_ease',
+              ),
+              MarkerLayer(
+                markers: [
+                  if (_currentLocation != null)
+                    Marker(
+                      point: LatLng(_currentLocation!.latitude!, _currentLocation!.longitude!),
+                      width: 40,
+                      height: 40,
+                      child: const Icon(
+                        Icons.my_location,
+                        color: Colors.blue,
+                        size: 30,
+                      ),
+                    ),
+                  ..._nearbyRestaurants.map((r) {
+                    return Marker(
+                      point: LatLng(r.lat ?? 0, r.lng ?? 0),
+                      width: 50,
+                      height: 50,
+                      child: GestureDetector(
+                        onTap: () {
+                          // TODO: Navigate to restaurant detail
+                        },
+                        child: const Icon(
+                          Icons.location_on,
+                          color: Color(0xfff7B43f),
+                          size: 40,
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ],
+              ),
+            ],
           ),
           if (_isLoading)
             const Center(child: CircularProgressIndicator(color: Color(0xfff7B43f))),
