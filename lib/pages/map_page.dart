@@ -151,6 +151,11 @@ class _MapPageState extends ConsumerState<MapPage> {
             const Center(child: CircularProgressIndicator(color: Color(0xfff7B43f))),
         ],
       ),
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: Colors.black,
+        child: const Icon(Icons.my_location, color: Colors.white),
+        onPressed: _animateToUser,
+      ),
     );
   }
 
