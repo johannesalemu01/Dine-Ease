@@ -129,7 +129,7 @@ class _MapPageState extends ConsumerState<MapPage> {
                           _mapController.move(LatLng(r.lat!, r.lng!), 15);
                         },
                         child: AnimatedScale(
-                          scale: isSelected ? 1.2 : 1.0,
+                          scale: isSelected ? 1.3 : 1.0,
                           duration: const Duration(milliseconds: 300),
                           child: Column(
                             children: [
@@ -139,6 +139,15 @@ class _MapPageState extends ConsumerState<MapPage> {
                                   color: Colors.black,
                                   borderRadius: BorderRadius.circular(10),
                                   border: Border.all(color: const Color(0xfff7B43f), width: 1),
+                                  boxShadow: isSelected
+                                      ? [
+                                          BoxShadow(
+                                            color: const Color(0xfff7B43f).withOpacity(0.5),
+                                            blurRadius: 10,
+                                            spreadRadius: 2,
+                                          )
+                                        ]
+                                      : [],
                                 ),
                                 child: Text(
                                   '${r.rating} ⭐',
