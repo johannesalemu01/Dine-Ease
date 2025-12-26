@@ -202,7 +202,22 @@ class _MapPageState extends ConsumerState<MapPage> {
             ),
           ),
           if (_isLoading)
-            const Center(child: CircularProgressIndicator(color: Color(0xfff7B43f))),
+            Container(
+              color: Colors.black.withOpacity(0.7),
+              child: const Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    CircularProgressIndicator(color: Color(0xfff7B43f)),
+                    SizedBox(height: 16),
+                    Text(
+                      'Finding the best spots...',
+                      style: TextStyle(color: Colors.white, fontWeight: FontWeight.w300),
+                    ),
+                  ],
+                ),
+              ),
+            ),
         ],
       ),
       floatingActionButton: FloatingActionButton(
