@@ -260,12 +260,34 @@ class _MapPageState extends ConsumerState<MapPage> {
                     overflow: TextOverflow.ellipsis,
                   ),
                   Text(restaurant.cuisine, style: TextStyle(color: Colors.grey[600], fontSize: 13)),
-                  const Spacer(),
+                  const SizedBox(height: 4),
                   Row(
                     children: [
-                      const Icon(Icons.star, color: Colors.amber, size: 16),
-                      Text(' ${restaurant.rating} (Found nearby)', style: const TextStyle(fontSize: 12)),
+                      ...List.generate(5, (index) {
+                        return Icon(
+                          index < (restaurant.rating / 2).floor() ? Icons.star : Icons.star_border,
+                          color: Colors.amber,
+                          size: 14,
+                        );
+                      }),
+                      const SizedBox(width: 4),
+                      Text(
+                        restaurant.rating.toString(),
+                        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                      ),
                     ],
+                  ),
+                  const Spacer(),
+                  ElevatedButton.icon(
+                    onPressed: () {}, // TODO: Open maps for directions
+                    icon: const Icon(Icons.directions, size: 16),
+                    label: const Text('Directions', style: TextStyle(fontSize: 12)),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xfff7B43f),
+                      foregroundColor: Colors.black,
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
+                      minimumSize: const Size(0, 30),
+                    ),
                   ),
                 ],
               ),
