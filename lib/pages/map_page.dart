@@ -173,10 +173,32 @@ class _MapPageState extends ConsumerState<MapPage> {
                                   style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
                                 ),
                               ),
-                              Icon(
-                                Icons.location_on,
-                                color: isSelected ? Colors.red : const Color(0xfff7B43f),
-                                size: 40,
+                              Stack(
+                                alignment: Alignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.location_on,
+                                    color: isSelected ? Colors.red : const Color(0xfff7B43f),
+                                    size: isSelected ? 60 : 50,
+                                  ),
+                                  Positioned(
+                                    top: 8,
+                                    child: Container(
+                                      width: isSelected ? 30 : 25,
+                                      height: isSelected ? 30 : 25,
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        border: Border.all(color: Colors.white, width: 1),
+                                        image: DecorationImage(
+                                          image: NetworkImage(
+                                            r.images.isNotEmpty ? r.images[0] : 'https://via.placeholder.com/100',
+                                          ),
+                                          fit: BoxFit.cover,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
                             ],
                           ),
