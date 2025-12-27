@@ -36,24 +36,43 @@ class _MapPageState extends ConsumerState<MapPage> {
     serviceEnabled = await location.serviceEnabled();
     if (!serviceEnabled) {
       serviceEnabled = await location.requestService();
-      if (!serviceEnabled) return;
+      if (!serviceEnabled) {
+        _showError('Location services are disabled.');
+        setState(() => _isLoading = false);
+        return;
+      }
     }
 
     permissionGranted = await location.hasPermission();
     if (permissionGranted == loc.PermissionStatus.denied) {
       permissionGranted = await location.requestPermission();
-      if (permissionGranted != loc.PermissionStatus.granted) return;
+      if (permissionGranted != loc.PermissionStatus.granted) {
+        _showError('Location permissions are denied.');
+        setState(() => _isLoading = false);
+        return;
+      }
     }
 
-    final currentLocation = await location.getLocation();
-    setState(() {
-      _currentLocation = currentLocation;
-    });
+    try {
+      final currentLocation = await location.getLocation();
+      setState(() {
+        _currentLocation = currentLocation;
+      });
 
-    if (currentLocation.latitude != null && currentLocation.longitude != null) {
-      await _fetchNearby(currentLocation.latitude!, currentLocation.longitude!);
-      _animateToUser();
+      if (currentLocation.latitude != null && currentLocation.longitude != null) {
+        await _fetchNearby(currentLocation.latitude!, currentLocation.longitude!);
+        _animateToUser();
+      }
+    } catch (e) {
+      _showError('Could not retrieve location: $e');
+      setState(() => _isLoading = false);
     }
+  }
+
+  void _showError(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message), backgroundColor: Colors.red),
+    );
   }
 
   Future<void> _fetchNearby(double lat, double lng) async {
