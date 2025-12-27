@@ -220,6 +220,26 @@ class _MapPageState extends ConsumerState<MapPage> {
               ],
             ),
           ),
+          Positioned(
+            top: 10,
+            left: 0,
+            right: 0,
+            child: Center(
+              child: ElevatedButton.icon(
+                onPressed: () {
+                  final center = _mapController.camera.center;
+                  _fetchNearby(center.latitude, center.longitude);
+                },
+                icon: const Icon(Icons.search, size: 18),
+                label: const Text('Search this area', style: TextStyle(fontSize: 12)),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.black.withOpacity(0.8),
+                  foregroundColor: const Color(0xfff7B43f),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                ),
+              ),
+            ),
+          ),
           if (_isLoading)
             Container(
               color: Colors.black.withOpacity(0.7),
