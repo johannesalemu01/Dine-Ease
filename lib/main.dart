@@ -41,7 +41,10 @@ Future<void> main() async {
     );
   }
 
+  debugPrint('🚀 DineEase starting up...');
+
   await Hive.initFlutter();
+  debugPrint('📦 Hive initialized.');
 
   // Initialize Supabase only when keys are provided.
   if (supabaseUrl.isNotEmpty && supabaseAnonKey.isNotEmpty) {
