@@ -1,5 +1,5 @@
+import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
@@ -8,6 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class ApiService {
   late final String baseUrl;
+  static const Duration _timeout = Duration(seconds: 10);
 
   ApiService() {
     final raw = dotenv.env['BACKEND_URL'] ?? 'http://10.42.0.10:5000/api';
@@ -31,7 +32,7 @@ class ApiService {
     debugPrint('📡 GET $url');
     final headers = await _getHeaders();
     try {
-      final response = await http.get(Uri.parse(url), headers: headers);
+      final response = await http.get(Uri.parse(url), headers: headers).timeout(_timeout);
       debugPrint('📡 GET $url → ${response.statusCode}');
       return response;
     } catch (e) {
@@ -41,33 +42,68 @@ class ApiService {
   }
 
   Future<http.Response> post(String endpoint, Map<String, dynamic> body) async {
+    final url = '$baseUrl$endpoint';
+    debugPrint('📡 POST $url');
     final headers = await _getHeaders();
-    return http.post(
-      Uri.parse('$baseUrl$endpoint'),
-      headers: headers,
-      body: jsonEncode(body),
-    );
+    try {
+      final response = await http.post(
+        Uri.parse(url),
+        headers: headers,
+        body: jsonEncode(body),
+      ).timeout(_timeout);
+      debugPrint('📡 POST $url → ${response.statusCode}');
+      return response;
+    } catch (e) {
+      debugPrint('❌ POST $url failed: $e');
+      rethrow;
+    }
   }
 
   Future<http.Response> patch(String endpoint, Map<String, dynamic> body) async {
+    final url = '$baseUrl$endpoint';
+    debugPrint('📡 PATCH $url');
     final headers = await _getHeaders();
-    return http.patch(
-      Uri.parse('$baseUrl$endpoint'),
-      headers: headers,
-      body: jsonEncode(body),
-    );
+    try {
+      final response = await http.patch(
+        Uri.parse(url),
+        headers: headers,
+        body: jsonEncode(body),
+      ).timeout(_timeout);
+      debugPrint('📡 PATCH $url → ${response.statusCode}');
+      return response;
+    } catch (e) {
+      debugPrint('❌ PATCH $url failed: $e');
+      rethrow;
+    }
   }
 
   Future<http.Response> delete(String endpoint) async {
+    final url = '$baseUrl$endpoint';
+    debugPrint('📡 DELETE $url');
     final headers = await _getHeaders();
-    return http.delete(Uri.parse('$baseUrl$endpoint'), headers: headers);
+    try {
+      final response = await http.delete(Uri.parse(url), headers: headers).timeout(_timeout);
+      debugPrint('📡 DELETE $url → ${response.statusCode}');
+      return response;
+    } catch (e) {
+      debugPrint('❌ DELETE $url failed: $e');
+      rethrow;
+    }
   }
 
   // Helper for GET requests with query parameters
   Future<http.Response> getWithParams(String endpoint, Map<String, String> params) async {
     final headers = await _getHeaders();
     final uri = Uri.parse('$baseUrl$endpoint').replace(queryParameters: params);
-    return http.get(uri, headers: headers);
+    debugPrint('📡 GET $uri');
+    try {
+      final response = await http.get(uri, headers: headers).timeout(_timeout);
+      debugPrint('📡 GET $uri → ${response.statusCode}');
+      return response;
+    } catch (e) {
+      debugPrint('❌ GET $uri failed: $e');
+      rethrow;
+    }
   }
 
   Future<http.Response> getNearbyRestaurants(double lat, double lng, {int radius = 5000}) async {
