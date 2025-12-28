@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
@@ -15,6 +16,16 @@ class ApiService {
     // Strip trailing slashes for consistent URL construction
     baseUrl = raw.endsWith('/') ? raw.substring(0, raw.length - 1) : raw;
     debugPrint('🌐 ApiService initialized with baseUrl: $baseUrl');
+  }
+
+  /// Returns a user-friendly diagnostic message for common connectivity errors.
+  String _friendlyError(Object e) {
+    if (e is SocketException) {
+      return 'Cannot reach server at $baseUrl. Is the backend running & device on the same Wi-Fi?';
+    } else if (e is TimeoutException) {
+      return 'Request to $baseUrl timed out after ${_timeout.inSeconds}s.';
+    }
+    return e.toString();
   }
 
   Future<Map<String, String>> _getHeaders() async {
