@@ -117,7 +117,8 @@ class ApiService {
     }
   }
 
-  Future<http.Response> getNearbyRestaurants(double lat, double lng, {int radius = 5000}) async {
+  Future<http.Response> getNearbyRestaurants(double lat, double lng, {int radius = 10000}) async {
+    debugPrint('🍽️ Fetching nearby restaurants at ($lat, $lng) within ${radius}m');
     return getWithParams('/restaurants/nearby', {
       'lat': lat.toString(),
       'lng': lng.toString(),
