@@ -47,7 +47,7 @@ class ApiService {
       debugPrint('📡 GET $url → ${response.statusCode}');
       return response;
     } catch (e) {
-      debugPrint('❌ GET $url failed: $e');
+      debugPrint('❌ GET $url failed: ${_friendlyError(e)}');
       rethrow;
     }
   }
@@ -65,7 +65,7 @@ class ApiService {
       debugPrint('📡 POST $url → ${response.statusCode}');
       return response;
     } catch (e) {
-      debugPrint('❌ POST $url failed: $e');
+      debugPrint('❌ POST $url failed: ${_friendlyError(e)}');
       rethrow;
     }
   }
@@ -83,7 +83,7 @@ class ApiService {
       debugPrint('📡 PATCH $url → ${response.statusCode}');
       return response;
     } catch (e) {
-      debugPrint('❌ PATCH $url failed: $e');
+      debugPrint('❌ PATCH $url failed: ${_friendlyError(e)}');
       rethrow;
     }
   }
@@ -97,7 +97,7 @@ class ApiService {
       debugPrint('📡 DELETE $url → ${response.statusCode}');
       return response;
     } catch (e) {
-      debugPrint('❌ DELETE $url failed: $e');
+      debugPrint('❌ DELETE $url failed: ${_friendlyError(e)}');
       rethrow;
     }
   }
@@ -112,7 +112,7 @@ class ApiService {
       debugPrint('📡 GET $uri → ${response.statusCode}');
       return response;
     } catch (e) {
-      debugPrint('❌ GET $uri failed: $e');
+      debugPrint('❌ GET $uri failed: ${_friendlyError(e)}');
       rethrow;
     }
   }
