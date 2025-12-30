@@ -60,9 +60,15 @@ Future<void> main() async {
     debugPrint('Supabase keys missing — skipping Supabase.initialize().');
   }
 
-  Hive.registerAdapter(FavouriteRestaurantAdapter());
-  await Hive.openBox<FavouriteRestaurant>('favList');
+  try {
+    Hive.registerAdapter(FavouriteRestaurantAdapter());
+    await Hive.openBox<FavouriteRestaurant>('favList');
+    debugPrint('📦 Hive favourites box opened.');
+  } catch (e) {
+    debugPrint('⚠️ Hive initialization error (continuing): $e');
+  }
 
+  debugPrint('✅ Initialization complete — launching app.');
   runApp(const ProviderScope(child: MesobAPP()));
 }
 
