@@ -1,17 +1,94 @@
 import 'package:flutter/material.dart';
 import 'package:toggle_switch/toggle_switch.dart';
 import 'package:dine_ease/pages/profile/update_password.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:dine_ease/providers/user/user_repository.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:dine_ease/pages/login.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
-class AppSettings extends StatefulWidget {
+class AppSettings extends ConsumerStatefulWidget {
   const AppSettings({super.key});
 
   @override
-  State<AppSettings> createState() => _AppSettingsState();
+  ConsumerState<AppSettings> createState() => _AppSettingsState();
 }
 
-class _AppSettingsState extends State<AppSettings> {
+class _AppSettingsState extends ConsumerState<AppSettings> {
+  String _displayName = 'User';
+  int _themeIndex = 1; // 0 for Dark, 1 for Light (initial)
+  bool _notificationsEnabled = true;
+  bool _loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSettings();
+  }
+
+  Future<void> _loadSettings() async {
+    final userRepo = ref.read(userRepositoryProvider);
+    final profile = await userRepo.getProfile();
+    if (profile != null) {
+      setState(() {
+        _displayName = profile['fullName'] ?? 'User';
+        _themeIndex = profile['preferences']?['theme'] == 'dark' ? 0 : 1;
+        _notificationsEnabled = profile['preferences']?['notifications'] ?? true;
+        _loading = false;
+      });
+    } else {
+      setState(() => _loading = false);
+    }
+  }
+
+  Future<void> _handleDeleteAccount() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: const Color(0xFF162236),
+        title: const Text('Delete Account', style: TextStyle(color: Colors.white)),
+        content: const Text(
+          'Are you sure you want to delete your account? This action cannot be undone.',
+          style: TextStyle(color: Colors.white70),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Delete', style: TextStyle(color: Colors.redAccent)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      final success = await ref.read(userRepositoryProvider).deleteAccount();
+      if (success) {
+        await Supabase.instance.client.auth.signOut();
+        if (!mounted) return;
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (_) => const Login()),
+          (route) => false,
+        );
+      } else {
+        Fluttertoast.showToast(msg: 'Failed to delete account');
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    if (_loading) {
+      return const Scaffold(
+        backgroundColor: Color.fromARGB(255, 10, 24, 39),
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 10, 24, 39),
       body: SingleChildScrollView(
@@ -45,9 +122,9 @@ class _AppSettingsState extends State<AppSettings> {
               radius: 45,
             ),
             const SizedBox(height: 10),
-            const Text(
-              'Mesob Orders and Delivery',
-              style: TextStyle(
+            Text(
+              _displayName,
+              style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w500,
                 color: Color.fromARGB(255, 223, 166, 73),
@@ -75,7 +152,6 @@ class _AppSettingsState extends State<AppSettings> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
-                    //TODO  Link the website
                     Text(
                       'Mesob Website',
                       style: TextStyle(
@@ -97,7 +173,7 @@ class _AppSettingsState extends State<AppSettings> {
                 color: Color.fromARGB(255, 199, 162, 102),
               ),
               title: const Text(
-                'Light Mode',
+                'Theme Mode',
                 style: TextStyle(color: Color.fromARGB(217, 255, 255, 255)),
               ),
               trailing: ToggleSwitch(
@@ -106,42 +182,48 @@ class _AppSettingsState extends State<AppSettings> {
                 minWidth: 50.0,
                 minHeight: 43.0,
                 cornerRadius: 10.0,
+                initialLabelIndex: _themeIndex,
                 activeBgColors: const [
                   [Color.fromARGB(187, 255, 255, 255)],
                   [Color.fromARGB(187, 255, 255, 255)],
                 ],
-                // activeFgColor: const Color.fromARGB(198, 255, 109, 64),
                 activeFgColor: Colors.black,
                 inactiveBgColor: const Color.fromARGB(255, 53, 50, 47),
                 inactiveFgColor: Colors.grey,
-                // initialLabelIndex: 1,
                 totalSwitches: 2,
                 icons: const [Icons.dark_mode, Icons.light_mode],
                 radiusStyle: true,
-                onToggle: (index) {
-                  print('switched to: $index');
-
-                  //Todo change the theme of the app
+                onToggle: (index) async {
+                  if (index != null) {
+                    final theme = index == 0 ? 'dark' : 'light';
+                    await ref.read(userRepositoryProvider).updatePreferences({
+                      'theme': theme,
+                    });
+                    setState(() => _themeIndex = index);
+                  }
                 },
               ),
             ),
-            // const SizedBox(height: 8),
-            const ListTile(
-              leading: Icon(
+            ListTile(
+              leading: const Icon(
                 Icons.notifications,
                 color: Color.fromARGB(255, 199, 162, 102),
               ),
-              title: Text(
+              title: const Text(
                 'Notification',
                 style: TextStyle(color: Colors.white70),
               ),
-              trailing: Icon(
-                Icons.chevron_right_outlined,
-                color: Color.fromARGB(255, 236, 196, 133),
-                size: 24,
+              trailing: Switch(
+                value: _notificationsEnabled,
+                activeColor: const Color.fromARGB(255, 236, 196, 133),
+                onChanged: (val) async {
+                  await ref.read(userRepositoryProvider).updatePreferences({
+                    'notifications': val,
+                  });
+                  setState(() => _notificationsEnabled = val);
+                },
               ),
             ),
-            // const SizedBox(height: 8),
             ListTile(
               leading: const Icon(
                 Icons.password,
@@ -207,7 +289,6 @@ class _AppSettingsState extends State<AppSettings> {
               child: Padding(
                 padding: EdgeInsets.only(left: 25.0),
                 child: Text(
-                  // textAlign: TextAlign.left,
                   'PRIVACY SETTINGS',
                   style: TextStyle(
                     fontSize: 16,
@@ -220,7 +301,6 @@ class _AppSettingsState extends State<AppSettings> {
             const SizedBox(height: 4),
             const Divider(thickness: 0.1),
             const SizedBox(height: 8),
-
             const Padding(
               padding: EdgeInsets.symmetric(horizontal: 24.0),
               child: Row(
@@ -251,21 +331,24 @@ class _AppSettingsState extends State<AppSettings> {
               ),
             ),
             const SizedBox(height: 15),
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 24.0),
-              child: Row(
-                children: [
-                  Text(
-                    'DELETE MY ACCOUNT',
-                    style: TextStyle(color: Color.fromARGB(255, 222, 38, 38)),
-                  ),
-                  Spacer(),
-                  Icon(
-                    Icons.chevron_right_outlined,
-                    size: 24,
-                    color: Color.fromARGB(255, 236, 196, 133),
-                  ),
-                ],
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24.0),
+              child: GestureDetector(
+                onTap: _handleDeleteAccount,
+                child: const Row(
+                  children: [
+                    Text(
+                      'DELETE MY ACCOUNT',
+                      style: TextStyle(color: Color.fromARGB(255, 222, 38, 38)),
+                    ),
+                    Spacer(),
+                    Icon(
+                      Icons.chevron_right_outlined,
+                      size: 24,
+                      color: Color.fromARGB(255, 236, 196, 133),
+                    ),
+                  ],
+                ),
               ),
             ),
           ],
