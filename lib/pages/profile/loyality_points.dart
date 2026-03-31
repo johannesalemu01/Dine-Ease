@@ -1,19 +1,48 @@
 import 'package:flutter/material.dart';
 import 'package:dine_ease/pages/search_page.dart';
 import 'package:flutter_svg/svg.dart';
-// import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:dine_ease/providers/user/user_repository.dart';
 
-class LoyalityPoint extends StatefulWidget {
+class LoyalityPoint extends ConsumerStatefulWidget {
   const LoyalityPoint({super.key});
 
   @override
-  State<LoyalityPoint> createState() => _LoyalityPointState();
+  ConsumerState<LoyalityPoint> createState() => _LoyalityPointState();
 }
 
-class _LoyalityPointState extends State<LoyalityPoint> {
+class _LoyalityPointState extends ConsumerState<LoyalityPoint> {
+  int _points = 0;
+  bool _loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadPoints();
+  }
+
+  Future<void> _loadPoints() async {
+    final userRepo = ref.read(userRepositoryProvider);
+    final profile = await userRepo.getProfile();
+    if (profile != null) {
+      setState(() {
+        _points = profile['points'] ?? 0;
+        _loading = false;
+      });
+    } else {
+      setState(() => _loading = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    int? points;
+    if (_loading) {
+      return const Scaffold(
+        backgroundColor: Colors.black,
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
@@ -22,17 +51,11 @@ class _LoyalityPointState extends State<LoyalityPoint> {
         leading: Row(
           children: [
             IconButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              icon: const Icon(
-                Icons.arrow_back,
-              ),
+              onPressed: () => Navigator.pop(context),
+              icon: const Icon(Icons.arrow_back),
               color: Colors.white,
             ),
-            const SizedBox(
-              width: 30,
-            ),
+            const SizedBox(width: 30),
             const Text(
               'Points',
               style: TextStyle(color: Colors.white, fontSize: 16),
@@ -46,58 +69,59 @@ class _LoyalityPointState extends State<LoyalityPoint> {
           ),
         ],
       ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Stack(
-            children: [
-              Image.asset(
-                'assets/images/home_background.png',
-                height: 130,
-                width: double.infinity,
-                fit: BoxFit.fill,
-              ),
-              Positioned(
-                top: 20,
-                left: 70,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Your current Points are',
-                      style: TextStyle(color: Colors.white),
-                    ),
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    Container(
-                      alignment: Alignment.center,
-                      width: 40,
-                      height: 40,
-                      child: Text(
-                        '${points ?? 0}',
-                        style: const TextStyle(
+      body: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Stack(
+              children: [
+                Image.asset(
+                  'assets/images/home_background.png',
+                  height: 130,
+                  width: double.infinity,
+                  fit: BoxFit.fill,
+                ),
+                Positioned(
+                  top: 20,
+                  left: 70,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Your current Points are',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                      const SizedBox(height: 10),
+                      Container(
+                        alignment: Alignment.center,
+                        height: 40,
+                        child: Text(
+                          '$_points',
+                          style: const TextStyle(
                             color: Colors.white,
                             fontSize: 25,
-                            fontWeight: FontWeight.bold),
-                      ),
-                    )
-                  ],
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      )
+                    ],
+                  ),
+                )
+              ],
+            ),
+            const SizedBox(height: 25),
+            const Padding(
+              padding: EdgeInsets.only(left: 15.0),
+              child: Text(
+                'Explore your point benefits',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
                 ),
-              )
-            ],
-          ),
-          const SizedBox(
-            height: 25,
-          ),
-          const Text(
-            'Explore your point benefits',
-            style: TextStyle(
-                color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600),
-          ),
-          const SizedBox(
-            height: 20,
-          ),
+              ),
+            ),
+            const SizedBox(height: 20),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 15),
             child: Column(
@@ -292,8 +316,9 @@ class _LoyalityPointState extends State<LoyalityPoint> {
           )
         ],
       ),
-    );
-  }
+    ),
+  );
+}
 }
 
 class HowDiscountsWork extends StatelessWidget {
