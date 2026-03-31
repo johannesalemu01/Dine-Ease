@@ -51,7 +51,7 @@ class _LoginState extends ConsumerState<Login> {
         msg: 'Please enter email and password',
         toastLength: Toast.LENGTH_SHORT,
         gravity: ToastGravity.TOP,
-        backgroundColor: const Color(0x00f7b43f),
+        backgroundColor: const Color(0xFFf7b43f),
         textColor: Colors.white,
       );
       return;
@@ -62,7 +62,7 @@ class _LoginState extends ConsumerState<Login> {
         msg: 'Using sanitized email: $email',
         toastLength: Toast.LENGTH_SHORT,
         gravity: ToastGravity.TOP,
-        backgroundColor: const Color(0x00f7b43f),
+        backgroundColor: const Color(0xFFf7b43f),
         textColor: Colors.white,
       );
     }
@@ -82,7 +82,7 @@ class _LoginState extends ConsumerState<Login> {
         msg: 'Please enter a valid email address',
         toastLength: Toast.LENGTH_SHORT,
         gravity: ToastGravity.TOP,
-        backgroundColor: const Color(0x00f7b43f),
+        backgroundColor: const Color(0xFFf7b43f),
         textColor: Colors.white,
       );
       return;
