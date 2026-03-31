@@ -1,23 +1,47 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:dine_ease/providers/user/user_repository.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
-class PersonalInformation extends StatefulWidget {
+class PersonalInformation extends ConsumerStatefulWidget {
   const PersonalInformation({super.key});
 
   @override
-  State<PersonalInformation> createState() => _PersonalInformationState();
+  ConsumerState<PersonalInformation> createState() => _PersonalInformationState();
 }
 
-class _PersonalInformationState extends State<PersonalInformation> {
+class _PersonalInformationState extends ConsumerState<PersonalInformation> {
   final _formKey = GlobalKey<FormState>();
   String? _title = 'Mr.';
-  final TextEditingController _firstName = TextEditingController(
-    text: 'Yohannes',
-  );
-  final TextEditingController _lastName = TextEditingController(text: 'Alemu');
-  final TextEditingController _email = TextEditingController(
-    text: 'jo@gmail.com',
-  );
+  final TextEditingController _firstName = TextEditingController();
+  final TextEditingController _lastName = TextEditingController();
+  final TextEditingController _email = TextEditingController();
   DateTime? _dob;
+  bool _loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadProfile();
+  }
+
+  Future<void> _loadProfile() async {
+    final userRepo = ref.read(userRepositoryProvider);
+    final profile = await userRepo.getProfile();
+    if (profile != null) {
+      final String fullName = profile['fullName'] ?? '';
+      final parts = fullName.split(' ');
+      
+      setState(() {
+        if (parts.isNotEmpty) _firstName.text = parts[0];
+        if (parts.length > 1) _lastName.text = parts.sublist(1).join(' ');
+        _email.text = profile['email'] ?? '';
+        _loading = false;
+      });
+    } else {
+      setState(() => _loading = false);
+    }
+  }
 
   @override
   void dispose() {
@@ -40,12 +64,27 @@ class _PersonalInformationState extends State<PersonalInformation> {
     if (picked != null) setState(() => _dob = picked);
   }
 
-  void _save() {
+  Future<void> _save() async {
     if (!_formKey.currentState!.validate()) return;
-    // TODO: persist changes via your repository/controller
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('Profile saved')));
+    
+    setState(() => _loading = true);
+    
+    final success = await ref.read(userRepositoryProvider).updateProfile({
+      'fullName': '${_firstName.text} ${_lastName.text}'.trim(),
+      'phoneNumber': '', // Add phone field if needed
+    });
+
+    setState(() => _loading = false);
+
+    if (success) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Profile updated successfully')),
+      );
+      Navigator.pop(context);
+    } else {
+      Fluttertoast.showToast(msg: 'Failed to update profile');
+    }
   }
 
   @override
@@ -53,6 +92,13 @@ class _PersonalInformationState extends State<PersonalInformation> {
     const pageBg = Color.fromARGB(255, 10, 24, 39);
     const cardBg = Color.fromARGB(255, 11, 23, 36);
     const accent = Color.fromARGB(255, 29, 144, 94);
+
+    if (_loading) {
+      return const Scaffold(
+        backgroundColor: pageBg,
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
 
     return Scaffold(
       backgroundColor: pageBg,
@@ -67,7 +113,6 @@ class _PersonalInformationState extends State<PersonalInformation> {
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
           child: Column(
             children: [
-              // avatar + basic info
               Container(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 12,
@@ -80,22 +125,22 @@ class _PersonalInformationState extends State<PersonalInformation> {
                       backgroundImage: AssetImage('assets/images/mesob.png'),
                     ),
                     const SizedBox(width: 14),
-                    const Expanded(
+                    Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Yohannes Alemu',
-                            style: TextStyle(
+                            '${_firstName.text} ${_lastName.text}',
+                            style: const TextStyle(
                               color: Colors.white,
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-                          SizedBox(height: 4),
+                          const SizedBox(height: 4),
                           Text(
-                            'jo@gmail.com',
-                            style: TextStyle(color: Colors.white70),
+                            _email.text,
+                            style: const TextStyle(color: Colors.white70),
                           ),
                         ],
                       ),
@@ -110,10 +155,7 @@ class _PersonalInformationState extends State<PersonalInformation> {
                   ],
                 ),
               ),
-
               const SizedBox(height: 12),
-
-              // form card
               Container(
                 width: double.infinity,
                 decoration: BoxDecoration(
@@ -125,7 +167,6 @@ class _PersonalInformationState extends State<PersonalInformation> {
                   key: _formKey,
                   child: Column(
                     children: [
-                      // Title dropdown
                       Row(
                         children: [
                           Expanded(
@@ -179,8 +220,6 @@ class _PersonalInformationState extends State<PersonalInformation> {
                         ],
                       ),
                       const SizedBox(height: 12),
-
-                      // First name
                       TextFormField(
                         controller: _firstName,
                         style: const TextStyle(color: Colors.white),
@@ -203,8 +242,6 @@ class _PersonalInformationState extends State<PersonalInformation> {
                             : null,
                       ),
                       const SizedBox(height: 12),
-
-                      // Last name
                       TextFormField(
                         controller: _lastName,
                         style: const TextStyle(color: Colors.white),
@@ -227,14 +264,13 @@ class _PersonalInformationState extends State<PersonalInformation> {
                             : null,
                       ),
                       const SizedBox(height: 12),
-
-                      // Email
                       TextFormField(
                         controller: _email,
                         keyboardType: TextInputType.emailAddress,
-                        style: const TextStyle(color: Colors.white),
+                        readOnly: true, // Email usually managed via Supabase
+                        style: const TextStyle(color: Colors.white38),
                         decoration: InputDecoration(
-                          labelText: 'Email',
+                          labelText: 'Email (Read Only)',
                           labelStyle: const TextStyle(color: Colors.white70),
                           filled: true,
                           fillColor: const Color(0xFF0B1218),
@@ -247,20 +283,8 @@ class _PersonalInformationState extends State<PersonalInformation> {
                             borderSide: BorderSide.none,
                           ),
                         ),
-                        validator: (v) {
-                          if (v == null || v.trim().isEmpty)
-                            return 'Enter email';
-                          final emailRegex = RegExp(
-                            r'^[^\s@]+@[^\s@]+\.[^\s@]+$',
-                          );
-                          return emailRegex.hasMatch(v.trim())
-                              ? null
-                              : 'Enter a valid email';
-                        },
                       ),
                       const SizedBox(height: 12),
-
-                      // DOB picker
                       GestureDetector(
                         onTap: _pickDob,
                         child: AbsorbPointer(
@@ -284,33 +308,30 @@ class _PersonalInformationState extends State<PersonalInformation> {
                                   ? 'Select date'
                                   : '${_dob!.year}-${_dob!.month.toString().padLeft(2, '0')}-${_dob!.day.toString().padLeft(2, '0')}',
                             ),
-                            validator: (v) =>
-                                _dob == null ? 'Select date of birth' : null,
                           ),
                         ),
                       ),
-
                       const SizedBox(height: 18),
-
-                      // Save button
                       SizedBox(
                         width: double.infinity,
                         height: 48,
                         child: ElevatedButton(
-                          onPressed: _save,
+                          onPressed: _loading ? null : _save,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: accent,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(8),
                             ),
                           ),
-                          child: const Text(
-                            'Save',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
+                          child: _loading 
+                            ? const CircularProgressIndicator(color: Colors.white)
+                            : const Text(
+                                'Save',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
                         ),
                       ),
                     ],
