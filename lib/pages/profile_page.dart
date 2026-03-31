@@ -1,3 +1,4 @@
+import 'package:dine_ease/providers/user/user_repository.dart';
 import 'package:dine_ease/providers/auth/auth_controller.dart';
 import 'package:dine_ease/providers/supabase_provider.dart';
 import 'package:flutter/material.dart';
@@ -26,55 +27,20 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
 
   Future<void> _loadProfile() async {
     try {
-      final supabase = ref.read(supabaseProvider);
-      final user = supabase.auth.currentUser;
-      if (user == null) {
+      final userRepo = ref.read(userRepositoryProvider);
+      final profile = await userRepo.getProfile();
+
+      if (profile != null) {
         setState(() {
-          _profileUsername = null;
+          _profileUsername = profile['fullName'] ?? profile['username'];
           _loadingProfile = false;
         });
-        return;
+      } else {
+        setState(() => _loadingProfile = false);
       }
-
-      // Query the profiles table for the username (adjust column name if different)
-      final res = await supabase
-          .from('profiles')
-          .select('full_name')
-          .eq('id', user.id)
-          .maybeSingle();
-
-      String? name;
-      try {
-        final dyn = res as dynamic;
-
-        final data = dyn.data ?? dyn;
-        if (kDebugMode) {
-          try {
-            debugPrint('Profile query raw response: $res');
-            debugPrint('Profile parsed data: $data');
-          } catch (e) {
-            debugPrint('Failed to debugPrint profile response: $e');
-          }
-        }
-        if (data is Map && data['full_name'] != null) {
-          name = data['full_name'] as String;
-        } else if (dyn is Map && dyn['full_name'] != null) {
-          name = dyn['full_name'] as String;
-        }
-      } catch (_) {
-        // ignore parsing errors
-      }
-
-      setState(() {
-        _profileUsername = name;
-        _loadingProfile = false;
-      });
     } catch (e) {
       if (kDebugMode) debugPrint('Profile load error: $e');
-      setState(() {
-        _profileUsername = null;
-        _loadingProfile = false;
-      });
+      setState(() => _loadingProfile = false);
     }
   }
 
