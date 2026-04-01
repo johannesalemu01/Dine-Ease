@@ -45,3 +45,5 @@ class ApiService {
     return http.delete(Uri.parse('$baseUrl$endpoint'), headers: headers);
   }
 }
+
+final apiServiceProvider = Provider<ApiService>((ref) => ApiService());
