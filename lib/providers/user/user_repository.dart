@@ -3,7 +3,9 @@ import 'package:dine_ease/services/api_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class UserRepository {
-  final ApiService _apiService = ApiService();
+  final ApiService _apiService;
+
+  UserRepository(this._apiService);
 
   Future<Map<String, dynamic>?> getProfile() async {
     final response = await _apiService.get('/users/profile');
@@ -29,4 +31,4 @@ class UserRepository {
   }
 }
 
-final userRepositoryProvider = Provider((ref) => UserRepository());
+final userRepositoryProvider = Provider((ref) => UserRepository(ApiService()));
