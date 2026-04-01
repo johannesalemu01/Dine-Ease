@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "790324700656",
+    "project_id": "dine-ease-684e2",
+    "storage_bucket": "dine-ease-684e2.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:790324700656:android:6b8bd6debcc02c31822935",
+        "android_client_info": {
+          "package_name": "com.example.dine_ease"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "790324700656-oqqlgijbse48vf90f6vg7gta8e9kp3dj.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBNS16E667NVDCVB3R8DDjyxTW31isZ9cM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "790324700656-oqqlgijbse48vf90f6vg7gta8e9kp3dj.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
