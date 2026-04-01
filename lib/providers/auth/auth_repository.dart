@@ -151,10 +151,13 @@ class AuthRepository {
     String? iosClientId,
   }) async {
     try {
-      // Configure GoogleSignIn. On web pass webClientId; for iOS fallback to iosClientId if provided.
+      // Configure GoogleSignIn based on platform.
       final googleSignIn = GoogleSignIn(
         scopes: <String>['email', 'profile'],
-        clientId: webClientId ?? iosClientId,
+        // On Android, we must NOT pass the clientId here; it's picked from google-services.json.
+        // We use serverClientId to get the ID token for Supabase.
+        clientId: kIsWeb || Platform.isIOS ? (webClientId ?? iosClientId) : null,
+        serverClientId: webClientId,
       );
 
       final account = await googleSignIn.signIn();
