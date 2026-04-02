@@ -10,7 +10,9 @@ class ApiService {
   late final String baseUrl;
 
   ApiService() {
-    baseUrl = dotenv.env['BACKEND_URL'] ?? 'http://10.42.0.10:5000/api';
+    final raw = dotenv.env['BACKEND_URL'] ?? 'http://10.42.0.10:5000/api';
+    // Strip trailing slashes for consistent URL construction
+    baseUrl = raw.endsWith('/') ? raw.substring(0, raw.length - 1) : raw;
     debugPrint('🌐 ApiService initialized with baseUrl: $baseUrl');
   }
 
