@@ -11,7 +11,20 @@ class BookingRepository {
 
   Future<List<Restaurant>> getRestaurants() async {
     try {
-      final response = await _apiService.get('/bookings/restaurants');
+      final response = await _apiService.get('/restaurants'); // Updated path
+      if (response.statusCode == 200) {
+        final List<dynamic> data = jsonDecode(response.body);
+        return data.map((json) => Restaurant.fromJson(json)).toList();
+      }
+      return [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  Future<List<Restaurant>> getNearbyRestaurants(double lat, double lng, {int radius = 5000}) async {
+    try {
+      final response = await _apiService.getNearbyRestaurants(lat, lng, radius: radius);
       if (response.statusCode == 200) {
         final List<dynamic> data = jsonDecode(response.body);
         return data.map((json) => Restaurant.fromJson(json)).toList();
