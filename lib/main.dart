@@ -45,7 +45,14 @@ Future<void> main() async {
 
   // Initialize Supabase only when keys are provided.
   if (supabaseUrl.isNotEmpty && supabaseAnonKey.isNotEmpty) {
-    await Supabase.initialize(url: supabaseUrl, anonKey: supabaseAnonKey);
+    try {
+      await Supabase.initialize(url: supabaseUrl, anonKey: supabaseAnonKey);
+      debugPrint('✅ Supabase initialized successfully.');
+    } catch (e) {
+      debugPrint(
+        '⚠️ Supabase initialization failed (app will continue without auth): $e',
+      );
+    }
   } else {
     debugPrint('Supabase keys missing — skipping Supabase.initialize().');
   }
