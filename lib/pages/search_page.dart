@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:dine_ease/pages/map_page.dart';
 
 class SearchPage extends StatefulWidget {
   const SearchPage({super.key});
@@ -178,7 +179,7 @@ class _SearchPage extends State<SearchPage> {
                   const SizedBox(
                     height: 25,
                   ),
-                  const SizedBox(
+                  SizedBox(
                     height: 450,
                     child: SingleChildScrollView(
                       child: Column(
@@ -222,6 +223,12 @@ class _SearchPage extends State<SearchPage> {
                                 labelTop: 'TheMosob selection',
                                 labelBottom: 'Nearby restaurants',
                                 icon: Icons.balcony_rounded,
+                                onTap: () => Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => const MapPage(),
+                                  ),
+                                ),
                               ),
                               CommunityTrends(
                                 labelTop: 'TheMosob selection',
@@ -255,56 +262,63 @@ class _SearchPage extends State<SearchPage> {
 }
 
 class CommunityTrends extends StatelessWidget {
+  final IconData icon;
+  final String labelTop;
+  final String labelBottom;
+  final VoidCallback? onTap;
+
   const CommunityTrends({
     required this.icon,
     required this.labelTop,
     required this.labelBottom,
+    this.onTap,
     super.key,
   });
-  final IconData icon;
-  final String labelTop;
-  final String labelBottom;
+
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 20),
-      child: Row(
-        children: [
-          Container(
-            width: 32,
-            height: 32,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(4),
-            ),
-            child: Container(
+      child: GestureDetector(
+        onTap: onTap,
+        child: Row(
+          children: [
+            Container(
+              width: 32,
+              height: 32,
               decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(3),
-                  border: Border.all(color: Colors.white54)),
-              child: Padding(
-                padding: const EdgeInsets.all(1.0),
-                child: Icon(
-                  icon,
-                  color: const Color.fromARGB(255, 105, 191, 150),
-                  size: 20,
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: Container(
+                decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(3),
+                    border: Border.all(color: Colors.white54)),
+                child: Padding(
+                  padding: const EdgeInsets.all(1.0),
+                  child: Icon(
+                    icon,
+                    color: const Color.fromARGB(255, 105, 191, 150),
+                    size: 20,
+                  ),
                 ),
               ),
             ),
-          ),
-          const SizedBox(
-            width: 12,
-          ),
-          RichText(
-            text: TextSpan(
-              text: '$labelTop\n',
-              style: const TextStyle(color: Colors.white70, fontSize: 12),
-              children: [
-                TextSpan(
-                    text: labelBottom,
-                    style: const TextStyle(color: Colors.white, fontSize: 15)),
-              ],
+            const SizedBox(
+              width: 12,
             ),
-          ),
-        ],
+            RichText(
+              text: TextSpan(
+                text: '$labelTop\n',
+                style: const TextStyle(color: Colors.white70, fontSize: 12),
+                children: [
+                  TextSpan(
+                      text: labelBottom,
+                      style: const TextStyle(color: Colors.white, fontSize: 15)),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
