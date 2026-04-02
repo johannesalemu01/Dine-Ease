@@ -44,6 +44,21 @@ class ApiService {
     final headers = await _getHeaders();
     return http.delete(Uri.parse('$baseUrl$endpoint'), headers: headers);
   }
+
+  // Helper for GET requests with query parameters
+  Future<http.Response> getWithParams(String endpoint, Map<String, String> params) async {
+    final headers = await _getHeaders();
+    final uri = Uri.parse('$baseUrl$endpoint').replace(queryParameters: params);
+    return http.get(uri, headers: headers);
+  }
+
+  Future<http.Response> getNearbyRestaurants(double lat, double lng, {int radius = 5000}) async {
+    return getWithParams('/restaurants/nearby', {
+      'lat': lat.toString(),
+      'lng': lng.toString(),
+      'radius': radius.toString(),
+    });
+  }
 }
 
 final apiServiceProvider = Provider<ApiService>((ref) => ApiService());
