@@ -7,6 +7,8 @@ class Restaurant {
   final List<String> images;
   final double rating;
   final int reviewsCount;
+  final double? lat;
+  final double? lng;
   final List<MenuItem> menu;
   final double? averagePrice;
   final bool isOpen;
@@ -20,6 +22,8 @@ class Restaurant {
     required this.images,
     required this.rating,
     required this.reviewsCount,
+    this.lat,
+    this.lng,
     required this.menu,
     this.averagePrice,
     required this.isOpen,
@@ -35,6 +39,8 @@ class Restaurant {
       images: List<String>.from(json['images'] ?? []),
       rating: (json['rating'] ?? 0).toDouble(),
       reviewsCount: json['reviewsCount'] ?? 0,
+      lat: (json['location']?['coordinates']?['lat'] as num?)?.toDouble(),
+      lng: (json['location']?['coordinates']?['lng'] as num?)?.toDouble(),
       menu: (json['menu'] as List? ?? [])
           .map((item) => MenuItem.fromJson(item))
           .toList(),
