@@ -27,8 +27,17 @@ class ApiService {
   }
 
   Future<http.Response> get(String endpoint) async {
+    final url = '$baseUrl$endpoint';
+    debugPrint('📡 GET $url');
     final headers = await _getHeaders();
-    return http.get(Uri.parse('$baseUrl$endpoint'), headers: headers);
+    try {
+      final response = await http.get(Uri.parse(url), headers: headers);
+      debugPrint('📡 GET $url → ${response.statusCode}');
+      return response;
+    } catch (e) {
+      debugPrint('❌ GET $url failed: $e');
+      rethrow;
+    }
   }
 
   Future<http.Response> post(String endpoint, Map<String, dynamic> body) async {
