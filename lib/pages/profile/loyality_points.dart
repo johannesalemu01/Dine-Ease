@@ -3,6 +3,7 @@ import 'package:dine_ease/pages/search_page.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:dine_ease/providers/user/user_repository.dart';
+import 'package:intl/intl.dart';
 
 class LoyalityPoint extends ConsumerStatefulWidget {
   const LoyalityPoint({super.key});
@@ -13,6 +14,7 @@ class LoyalityPoint extends ConsumerStatefulWidget {
 
 class _LoyalityPointState extends ConsumerState<LoyalityPoint> {
   int _points = 0;
+  List<dynamic> _transactions = [];
   bool _loading = true;
   String? _errorMessage;
 
@@ -25,12 +27,21 @@ class _LoyalityPointState extends ConsumerState<LoyalityPoint> {
   Future<void> _loadPoints() async {
     if (!mounted) return;
     setState(() { _loading = true; _errorMessage = null; });
-    await Future.delayed(const Duration(milliseconds: 500));
-    if (!mounted) return;
-    setState(() {
-      _points = 500;
-      _loading = false;
-    });
+    try {
+      final userRepo = ref.read(userRepositoryProvider);
+      final profile = await userRepo.getProfile();
+      final transactions = await userRepo.getLoyaltyHistory();
+      if (!mounted) return;
+      setState(() {
+        _points = profile['points'] ?? 0;
+        _transactions = transactions;
+        _loading = false;
+      });
+    } catch (e) {
+      debugPrint('❌ _loadPoints error: $e');
+      if (!mounted) return;
+      setState(() { _loading = false; _errorMessage = e.toString().replaceFirst('Exception: ', ''); });
+    }
   }
 
   @override
@@ -321,24 +332,96 @@ class _LoyalityPointState extends ConsumerState<LoyalityPoint> {
                 const SizedBox(
                   height: 20,
                 ),
-                const Text(
-                  'No recent Points activity',
-                  style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600),
-                ),
-                const SizedBox(
-                  height: 8,
-                ),
-                const Text(
-                  textAlign: TextAlign.center,
-                  'Start earning loyality Points by booking your first restaurant or inviting friends to TheMesob ',
-                  style: TextStyle(
-                    color: Colors.white70,
-                    fontSize: 12,
+                if (_transactions.isEmpty) ...[
+                  const Text(
+                    'No recent Points activity',
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600),
                   ),
-                ),
+                  const SizedBox(height: 8),
+                  const Text(
+                    textAlign: TextAlign.center,
+                    'Start earning loyality Points by booking your first restaurant or inviting friends to TheMesob ',
+                    style: TextStyle(
+                      color: Colors.white70,
+                      fontSize: 12,
+                    ),
+                  ),
+                ] else ...[
+                  const Text(
+                    'Recent Points Activity',
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600),
+                  ),
+                  const SizedBox(height: 16),
+                  ListView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: _transactions.length,
+                    itemBuilder: (context, index) {
+                      final txn = _transactions[index];
+                      final isEarn = txn['type'] == 'EARN';
+                      final amount = txn['amount'] ?? 0;
+                      final dateStr = txn['createdAt'] ?? '';
+                      DateTime? date;
+                      if (dateStr.isNotEmpty) {
+                        try {
+                          date = DateTime.parse(dateStr);
+                        } catch (_) {}
+                      }
+                      
+                      return Card(
+                        color: const Color.fromARGB(210, 22, 20, 34),
+                        margin: const EdgeInsets.only(bottom: 12),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            side: const BorderSide(
+                                color: Colors.white24, width: 0.5)),
+                        child: ListTile(
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                          leading: Container(
+                            width: 40,
+                            height: 40,
+                            decoration: BoxDecoration(
+                                color: isEarn 
+                                    ? const Color.fromARGB(255, 26, 95, 30)
+                                    : const Color.fromARGB(255, 120, 30, 30),
+                                borderRadius: BorderRadius.circular(8)),
+                            child: Icon(
+                              isEarn ? Icons.add_circle_outline : Icons.remove_circle_outline,
+                              color: Colors.white,
+                            ),
+                          ),
+                          title: Text(
+                            txn['description'] ?? 'Transaction',
+                            style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w600),
+                          ),
+                          subtitle: Text(
+                            date != null 
+                                ? DateFormat('MMM d, yyyy • h:mm a').format(date.toLocal()) 
+                                : 'Unknown Date',
+                            style: const TextStyle(color: Colors.white54, fontSize: 12),
+                          ),
+                          trailing: Text(
+                            '${isEarn ? '+' : '-'}${amount.abs()}',
+                            style: TextStyle(
+                                color: isEarn 
+                                    ? const Color.fromARGB(255, 155, 225, 141)
+                                    : Colors.redAccent,
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ],
                 const SizedBox(
                   height: 45,
                 ),
