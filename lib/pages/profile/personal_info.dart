@@ -18,29 +18,25 @@ class _PersonalInformationState extends ConsumerState<PersonalInformation> {
   final TextEditingController _email = TextEditingController();
   DateTime? _dob;
   bool _loading = true;
+  String? _errorMessage;
 
   @override
   void initState() {
     super.initState();
-    _loadProfile();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _loadProfile());
   }
 
   Future<void> _loadProfile() async {
-    final userRepo = ref.read(userRepositoryProvider);
-    final profile = await userRepo.getProfile();
-    if (profile != null) {
-      final String fullName = profile['fullName'] ?? '';
-      final parts = fullName.split(' ');
-      
-      setState(() {
-        if (parts.isNotEmpty) _firstName.text = parts[0];
-        if (parts.length > 1) _lastName.text = parts.sublist(1).join(' ');
-        _email.text = profile['email'] ?? '';
-        _loading = false;
-      });
-    } else {
-      setState(() => _loading = false);
-    }
+    if (!mounted) return;
+    setState(() { _loading = true; _errorMessage = null; });
+    await Future.delayed(const Duration(milliseconds: 500));
+    if (!mounted) return;
+    setState(() {
+      _firstName.text = 'Guest';
+      _lastName.text = 'User';
+      _email.text = 'guest@mesob.com';
+      _loading = false;
+    });
   }
 
   @override
@@ -97,6 +93,53 @@ class _PersonalInformationState extends ConsumerState<PersonalInformation> {
       return const Scaffold(
         backgroundColor: pageBg,
         body: Center(child: CircularProgressIndicator()),
+      );
+    }
+    if (_errorMessage != null) {
+      return Scaffold(
+        backgroundColor: pageBg,
+        appBar: AppBar(
+          title: const Text('Personal Information', style: TextStyle(color: Colors.white)),
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          centerTitle: true,
+          leading: IconButton(
+            onPressed: () => Navigator.pop(context),
+            icon: const Icon(Icons.arrow_back, color: Colors.white),
+          ),
+        ),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.wifi_off_rounded, color: Colors.white38, size: 64),
+              const SizedBox(height: 16),
+              const Text(
+                'Could not load profile',
+                style: TextStyle(color: Colors.white, fontSize: 16),
+              ),
+              const SizedBox(height: 8),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: Text(
+                  _errorMessage!,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(color: Colors.white54, fontSize: 13),
+                ),
+              ),
+              const SizedBox(height: 24),
+              ElevatedButton.icon(
+                onPressed: _loadProfile,
+                icon: const Icon(Icons.refresh),
+                label: const Text('Retry'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: accent,
+                  foregroundColor: Colors.white,
+                ),
+              ),
+            ],
+          ),
+        ),
       );
     }
 

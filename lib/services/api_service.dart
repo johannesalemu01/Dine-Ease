@@ -12,7 +12,23 @@ class ApiService {
   static const Duration _timeout = Duration(seconds: 10);
 
   ApiService() {
-    final raw = dotenv.env['BACKEND_URL'] ?? 'http://10.42.0.10:5000/api';
+    String defaultUrl = 'http://10.42.0.245:8000/api';
+    try {
+      if (Platform.isAndroid) {
+        defaultUrl = 'http://10.0.2.2:8000/api';
+      } else if (Platform.isIOS || Platform.isMacOS) {
+        defaultUrl = 'http://localhost:8000/api';
+      }
+    } catch (_) {} // In case we're on web where Platform.isAndroid throws
+
+    String raw = dotenv.env['BACKEND_URL'] ?? defaultUrl;
+    
+    // Fallback logic if .env has the old bad IP address still cached in memory
+    // or if it's using the host Wi-Fi IP which can be unreliable in emulators
+    if (raw.contains('10.42.')) {
+        raw = defaultUrl;
+    }
+
     // Strip trailing slashes for consistent URL construction
     baseUrl = raw.endsWith('/') ? raw.substring(0, raw.length - 1) : raw;
     debugPrint('🌐 ApiService initialized with baseUrl: $baseUrl');

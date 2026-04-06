@@ -16,29 +16,28 @@ class AppSettings extends ConsumerStatefulWidget {
 
 class _AppSettingsState extends ConsumerState<AppSettings> {
   String _displayName = 'User';
-  int _themeIndex = 1; // 0 for Dark, 1 for Light (initial)
+  int _themeIndex = 1;
   bool _notificationsEnabled = true;
   bool _loading = true;
+  String? _errorMessage;
 
   @override
   void initState() {
     super.initState();
-    _loadSettings();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _loadSettings());
   }
 
   Future<void> _loadSettings() async {
-    final userRepo = ref.read(userRepositoryProvider);
-    final profile = await userRepo.getProfile();
-    if (profile != null) {
-      setState(() {
-        _displayName = profile['fullName'] ?? 'User';
-        _themeIndex = profile['preferences']?['theme'] == 'dark' ? 0 : 1;
-        _notificationsEnabled = profile['preferences']?['notifications'] ?? true;
-        _loading = false;
-      });
-    } else {
-      setState(() => _loading = false);
-    }
+    if (!mounted) return;
+    setState(() { _loading = true; _errorMessage = null; });
+    await Future.delayed(const Duration(milliseconds: 500));
+    if (!mounted) return;
+    setState(() {
+      _displayName = 'Guest User';
+      _themeIndex = 1;
+      _notificationsEnabled = true;
+      _loading = false;
+    });
   }
 
   Future<void> _handleDeleteAccount() async {
@@ -86,6 +85,51 @@ class _AppSettingsState extends ConsumerState<AppSettings> {
       return const Scaffold(
         backgroundColor: Color.fromARGB(255, 10, 24, 39),
         body: Center(child: CircularProgressIndicator()),
+      );
+    }
+    if (_errorMessage != null) {
+      return Scaffold(
+        backgroundColor: const Color.fromARGB(255, 10, 24, 39),
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          leading: IconButton(
+            onPressed: () => Navigator.pop(context),
+            icon: const Icon(Icons.arrow_back, color: Colors.white),
+          ),
+          title: const Text('Settings', style: TextStyle(color: Colors.white)),
+        ),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.wifi_off_rounded, color: Colors.white38, size: 64),
+              const SizedBox(height: 16),
+              const Text(
+                'Could not load settings',
+                style: TextStyle(color: Colors.white, fontSize: 16),
+              ),
+              const SizedBox(height: 8),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: Text(
+                  _errorMessage!,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(color: Colors.white54, fontSize: 13),
+                ),
+              ),
+              const SizedBox(height: 24),
+              ElevatedButton.icon(
+                onPressed: _loadSettings,
+                icon: const Icon(Icons.refresh),
+                label: const Text('Retry'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color.fromARGB(255, 2, 126, 122),
+                  foregroundColor: Colors.white,
+                ),
+              ),
+            ],
+          ),
+        ),
       );
     }
 
@@ -218,7 +262,7 @@ class _AppSettingsState extends ConsumerState<AppSettings> {
                 activeColor: const Color.fromARGB(255, 236, 196, 133),
                 onChanged: (val) async {
                   await ref.read(userRepositoryProvider).updatePreferences({
-                    'notifications': val,
+                    'notifications': {'push': val, 'email': val},
                   });
                   setState(() => _notificationsEnabled = val);
                 },

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:latlong2/latlong2.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:location/location.dart' as loc;
 import 'package:dine_ease/models/restaurant.dart';
 import 'package:dine_ease/providers/booking/booking_repository.dart';
@@ -58,8 +58,12 @@ class _MapPageState extends ConsumerState<MapPage> {
         _currentLocation = currentLocation;
       });
 
-      if (currentLocation.latitude != null && currentLocation.longitude != null) {
-        await _fetchNearby(currentLocation.latitude!, currentLocation.longitude!);
+      if (currentLocation.latitude != null &&
+          currentLocation.longitude != null) {
+        await _fetchNearby(
+          currentLocation.latitude!,
+          currentLocation.longitude!,
+        );
         _animateToUser();
       }
     } catch (e) {
@@ -75,7 +79,9 @@ class _MapPageState extends ConsumerState<MapPage> {
   }
 
   Future<void> _fetchNearby(double lat, double lng) async {
-    final restaurants = await ref.read(bookingRepositoryProvider).getNearbyRestaurants(lat, lng);
+    final restaurants = await ref
+        .read(bookingRepositoryProvider)
+        .getNearbyRestaurants(lat, lng);
     setState(() {
       _nearbyRestaurants = restaurants;
       _isLoading = false;
@@ -96,7 +102,10 @@ class _MapPageState extends ConsumerState<MapPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Nearby Restaurants', style: TextStyle(color: Colors.white)),
+        title: const Text(
+          'Nearby Restaurants',
+          style: TextStyle(color: Colors.white),
+        ),
         backgroundColor: Colors.black,
         iconTheme: const IconThemeData(color: Colors.white),
       ),
@@ -126,7 +135,10 @@ class _MapPageState extends ConsumerState<MapPage> {
                 markers: [
                   if (_currentLocation != null)
                     Marker(
-                      point: LatLng(_currentLocation!.latitude!, _currentLocation!.longitude!),
+                      point: LatLng(
+                        _currentLocation!.latitude!,
+                        _currentLocation!.longitude!,
+                      ),
                       width: 40,
                       height: 40,
                       child: const Icon(
@@ -152,24 +164,36 @@ class _MapPageState extends ConsumerState<MapPage> {
                           child: Column(
                             children: [
                               Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 4,
+                                ),
                                 decoration: BoxDecoration(
                                   color: Colors.black,
                                   borderRadius: BorderRadius.circular(10),
-                                  border: Border.all(color: const Color(0xfff7B43f), width: 1),
+                                  border: Border.all(
+                                    color: const Color(0xfff7B43f),
+                                    width: 1,
+                                  ),
                                   boxShadow: isSelected
                                       ? [
                                           BoxShadow(
-                                            color: const Color(0xfff7B43f).withOpacity(0.5),
+                                            color: const Color(
+                                              0xfff7B43f,
+                                            ).withOpacity(0.5),
                                             blurRadius: 10,
                                             spreadRadius: 2,
-                                          )
+                                          ),
                                         ]
                                       : [],
                                 ),
                                 child: Text(
                                   '${r.rating} ⭐',
-                                  style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
                               ),
                               Stack(
@@ -177,7 +201,9 @@ class _MapPageState extends ConsumerState<MapPage> {
                                 children: [
                                   Icon(
                                     Icons.location_on,
-                                    color: isSelected ? Colors.red : const Color(0xfff7B43f),
+                                    color: isSelected
+                                        ? Colors.red
+                                        : const Color(0xfff7B43f),
                                     size: isSelected ? 60 : 50,
                                   ),
                                   Positioned(
@@ -187,10 +213,15 @@ class _MapPageState extends ConsumerState<MapPage> {
                                       height: isSelected ? 30 : 25,
                                       decoration: BoxDecoration(
                                         shape: BoxShape.circle,
-                                        border: Border.all(color: Colors.white, width: 1),
+                                        border: Border.all(
+                                          color: Colors.white,
+                                          width: 1,
+                                        ),
                                         image: DecorationImage(
                                           image: NetworkImage(
-                                            r.images.isNotEmpty ? r.images[0] : 'https://via.placeholder.com/100',
+                                            r.images.isNotEmpty
+                                                ? r.images[0]
+                                                : 'https://via.placeholder.com/100',
                                           ),
                                           fit: BoxFit.cover,
                                         ),
@@ -226,7 +257,10 @@ class _MapPageState extends ConsumerState<MapPage> {
                   heroTag: 'zoom_in',
                   child: const Icon(Icons.add, color: Colors.white),
                   onPressed: () {
-                    _mapController.move(_mapController.camera.center, _mapController.camera.zoom + 1);
+                    _mapController.move(
+                      _mapController.camera.center,
+                      _mapController.camera.zoom + 1,
+                    );
                   },
                 ),
                 const SizedBox(height: 10),
@@ -235,7 +269,10 @@ class _MapPageState extends ConsumerState<MapPage> {
                   heroTag: 'zoom_out',
                   child: const Icon(Icons.remove, color: Colors.white),
                   onPressed: () {
-                    _mapController.move(_mapController.camera.center, _mapController.camera.zoom - 1);
+                    _mapController.move(
+                      _mapController.camera.center,
+                      _mapController.camera.zoom - 1,
+                    );
                   },
                 ),
               ],
@@ -252,11 +289,16 @@ class _MapPageState extends ConsumerState<MapPage> {
                   _fetchNearby(center.latitude, center.longitude);
                 },
                 icon: const Icon(Icons.search, size: 18),
-                label: const Text('Search this area', style: TextStyle(fontSize: 12)),
+                label: const Text(
+                  'Search this area',
+                  style: TextStyle(fontSize: 12),
+                ),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.black.withOpacity(0.8),
                   foregroundColor: const Color(0xfff7B43f),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
                 ),
               ),
             ),
@@ -272,7 +314,10 @@ class _MapPageState extends ConsumerState<MapPage> {
                     SizedBox(height: 16),
                     Text(
                       'Finding the best spots...',
-                      style: TextStyle(color: Colors.white, fontWeight: FontWeight.w300),
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w300,
+                      ),
                     ),
                   ],
                 ),
@@ -300,11 +345,14 @@ class _MapPageState extends ConsumerState<MapPage> {
             ClipRRect(
               borderRadius: BorderRadius.circular(10),
               child: Image.network(
-                restaurant.images.isNotEmpty ? restaurant.images[0] : 'https://via.placeholder.com/100',
+                restaurant.images.isNotEmpty
+                    ? restaurant.images[0]
+                    : 'https://via.placeholder.com/100',
                 width: 100,
                 height: 100,
                 fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => Container(color: Colors.grey, width: 100, height: 100),
+                errorBuilder: (_, __, ___) =>
+                    Container(color: Colors.grey, width: 100, height: 100),
               ),
             ),
             const SizedBox(width: 12),
@@ -315,17 +363,25 @@ class _MapPageState extends ConsumerState<MapPage> {
                 children: [
                   Text(
                     restaurant.name,
-                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  Text(restaurant.cuisine, style: TextStyle(color: Colors.grey[600], fontSize: 13)),
+                  Text(
+                    restaurant.cuisine,
+                    style: TextStyle(color: Colors.grey[600], fontSize: 13),
+                  ),
                   const SizedBox(height: 4),
                   Row(
                     children: [
                       ...List.generate(5, (index) {
                         return Icon(
-                          index < (restaurant.rating / 2).floor() ? Icons.star : Icons.star_border,
+                          index < (restaurant.rating / 2).floor()
+                              ? Icons.star
+                              : Icons.star_border,
                           color: Colors.amber,
                           size: 14,
                         );
@@ -333,7 +389,10 @@ class _MapPageState extends ConsumerState<MapPage> {
                       const SizedBox(width: 4),
                       Text(
                         restaurant.rating.toString(),
-                        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ],
                   ),
@@ -341,11 +400,17 @@ class _MapPageState extends ConsumerState<MapPage> {
                   ElevatedButton.icon(
                     onPressed: () {}, // TODO: Open maps for directions
                     icon: const Icon(Icons.directions, size: 16),
-                    label: const Text('Directions', style: TextStyle(fontSize: 12)),
+                    label: const Text(
+                      'Directions',
+                      style: TextStyle(fontSize: 12),
+                    ),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xfff7B43f),
                       foregroundColor: Colors.black,
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 0,
+                      ),
                       minimumSize: const Size(0, 30),
                     ),
                   ),

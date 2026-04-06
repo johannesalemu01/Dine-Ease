@@ -41,7 +41,7 @@ Future<void> main() async {
     );
   }
 
-  debugPrint('🚀 DineEase starting up...');
+  debugPrint('🚀🚀🚀 DineEase starting up...');
 
   await Hive.initFlutter();
   debugPrint('📦 Hive initialized.');
@@ -63,7 +63,7 @@ Future<void> main() async {
   try {
     Hive.registerAdapter(FavouriteRestaurantAdapter());
     await Hive.openBox<FavouriteRestaurant>('favList');
-    debugPrint('📦 Hive favourites box opened.');
+    debugPrint('📦📦📦 Hive favourites box opened.');
   } catch (e) {
     debugPrint('⚠️ Hive initialization error (continuing): $e');
   }
@@ -93,7 +93,9 @@ class _MesobAPPState extends ConsumerState<MesobAPP> {
     super.initState();
     // Listen to Supabase auth state changes (guarded for offline mode)
     try {
-      _authSub = Supabase.instance.client.auth.onAuthStateChange.listen((event) {
+      _authSub = Supabase.instance.client.auth.onAuthStateChange.listen((
+        event,
+      ) {
         final authEvent = event.event;
         if (authEvent == AuthChangeEvent.passwordRecovery) {
           appNavigatorKey.currentState?.pushReplacementNamed('/new-password');

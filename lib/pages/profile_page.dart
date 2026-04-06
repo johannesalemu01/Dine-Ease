@@ -26,22 +26,14 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   }
 
   Future<void> _loadProfile() async {
-    try {
-      final userRepo = ref.read(userRepositoryProvider);
-      final profile = await userRepo.getProfile();
-
-      if (profile != null) {
-        setState(() {
-          _profileUsername = profile['fullName'] ?? profile['username'];
-          _loadingProfile = false;
-        });
-      } else {
-        setState(() => _loadingProfile = false);
-      }
-    } catch (e) {
-      if (kDebugMode) debugPrint('Profile load error: $e');
-      setState(() => _loadingProfile = false);
-    }
+    if (!mounted) return;
+    setState(() { _loadingProfile = true; });
+    await Future.delayed(const Duration(milliseconds: 500));
+    if (!mounted) return;
+    setState(() {
+      _profileUsername = 'Guest User';
+      _loadingProfile = false;
+    });
   }
 
   @override

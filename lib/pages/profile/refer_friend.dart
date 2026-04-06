@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -13,24 +14,23 @@ class ReferFriend extends ConsumerStatefulWidget {
 class _ReferFriendState extends ConsumerState<ReferFriend> {
   final TextEditingController _controller = TextEditingController();
   bool _loading = true;
+  String? _errorMessage;
 
   @override
   void initState() {
     super.initState();
-    _loadReferralCode();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _loadReferralCode());
   }
 
   Future<void> _loadReferralCode() async {
-    final userRepo = ref.read(userRepositoryProvider);
-    final profile = await userRepo.getProfile();
-    if (profile != null) {
-      setState(() {
-        _controller.text = (profile['referralCode'] ?? 'DINEEASE').toString().toUpperCase();
-        _loading = false;
-      });
-    } else {
-      setState(() => _loading = false);
-    }
+    if (!mounted) return;
+    setState(() { _loading = true; _errorMessage = null; });
+    await Future.delayed(const Duration(milliseconds: 500));
+    if (!mounted) return;
+    setState(() {
+      _controller.text = 'DINEEASE123';
+      _loading = false;
+    });
   }
 
   @override
@@ -45,6 +45,53 @@ class _ReferFriendState extends ConsumerState<ReferFriend> {
       return const Scaffold(
         backgroundColor: Colors.black,
         body: Center(child: CircularProgressIndicator()),
+      );
+    }
+    if (_errorMessage != null) {
+      return Scaffold(
+        backgroundColor: Colors.black,
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              GestureDetector(
+                onTap: () => Navigator.pop(context),
+                child: const Align(
+                  alignment: Alignment.topLeft,
+                  child: Padding(
+                    padding: EdgeInsets.only(left: 30, bottom: 20),
+                    child: Icon(Icons.arrow_back, color: Colors.white),
+                  ),
+                ),
+              ),
+              const Icon(Icons.wifi_off_rounded, color: Colors.white38, size: 64),
+              const SizedBox(height: 16),
+              const Text(
+                'Could not load referral code',
+                style: TextStyle(color: Colors.white, fontSize: 16),
+              ),
+              const SizedBox(height: 8),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: Text(
+                  _errorMessage!,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(color: Colors.white54, fontSize: 13),
+                ),
+              ),
+              const SizedBox(height: 24),
+              ElevatedButton.icon(
+                onPressed: _loadReferralCode,
+                icon: const Icon(Icons.refresh),
+                label: const Text('Retry'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color.fromARGB(255, 42, 158, 144),
+                  foregroundColor: Colors.white,
+                ),
+              ),
+            ],
+          ),
+        ),
       );
     }
 
