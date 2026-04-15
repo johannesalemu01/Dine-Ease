@@ -21,7 +21,12 @@ class ApiService {
       }
     } catch (_) {} // In case we're on web where Platform.isAndroid throws
 
-    String raw = dotenv.env['BACKEND_URL'] ?? defaultUrl;
+    String raw = defaultUrl;
+    try {
+      if (dotenv.isInitialized) {
+        raw = dotenv.env['BACKEND_URL'] ?? defaultUrl;
+      }
+    } catch (_) {}
     
     // Fallback logic if .env has the old bad IP address still cached in memory
     // or if it's using the host Wi-Fi IP which can be unreliable in emulators
