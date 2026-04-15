@@ -23,10 +23,7 @@ class _FavouritePage extends ConsumerState<FavouritePage> {
       backgroundColor: Colors.black,
       body: Column(
         children: [
-          Container(
-            color: Colors.black,
-            height: 50,
-          ),
+          Container(color: Colors.black, height: 50),
           Material(
             elevation: 10,
             child: Container(
@@ -54,7 +51,7 @@ class _FavouritePage extends ConsumerState<FavouritePage> {
                         color: Colors.white70,
                         size: 26,
                       ),
-                    )
+                    ),
                   ],
                 ),
               ),
@@ -68,8 +65,9 @@ class _FavouritePage extends ConsumerState<FavouritePage> {
                       textAlign: TextAlign.center,
                       'You don\'t have any favourite \nrestaurant yet!!',
                       style: TextStyle(
-                          color: Color.fromARGB(255, 220, 227, 213),
-                          fontSize: 18),
+                        color: Color.fromARGB(255, 220, 227, 213),
+                        fontSize: 18,
+                      ),
                     ),
                   )
                 : ListView.builder(
@@ -89,8 +87,10 @@ class _FavouritePage extends ConsumerState<FavouritePage> {
                         subtitle: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(list[index].createdTime.toString(),
-                                style: const TextStyle(color: Colors.white70)),
+                            Text(
+                              list[index].createdTime.toString(),
+                              style: const TextStyle(color: Colors.white70),
+                            ),
                           ],
                         ),
                         trailing: IconButton(
@@ -113,14 +113,17 @@ class _FavouritePage extends ConsumerState<FavouritePage> {
             color: Colors.transparent,
             elevation: 10,
             child: Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 4.0, vertical: 12),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 4.0,
+                vertical: 12,
+              ),
               child: GestureDetector(
                 onTap: () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => const FavoriteList()),
+                      builder: (context) => const FavoriteList(),
+                    ),
                   );
                 },
                 child: Container(
@@ -133,11 +136,7 @@ class _FavouritePage extends ConsumerState<FavouritePage> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Icon(
-                          Icons.add,
-                          color: Colors.white,
-                          size: 22,
-                        ),
+                        const Icon(Icons.add, color: Colors.white, size: 22),
                         Text(
                           'create a new list'.toUpperCase(),
                           style: const TextStyle(
@@ -215,9 +214,7 @@ class _FavoriteListState extends ConsumerState<FavoriteList> {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SizedBox(
-            height: 50,
-          ),
+          const SizedBox(height: 50),
           Container(
             width: double.infinity,
             color: const Color.fromARGB(255, 54, 60, 66),
@@ -230,19 +227,15 @@ class _FavoriteListState extends ConsumerState<FavoriteList> {
                   icon: const Icon(Icons.arrow_back),
                   color: Colors.white,
                 ),
-                const SizedBox(
-                  width: 20,
-                ),
+                const SizedBox(width: 20),
                 const Text(
                   'Create  a new list',
                   style: TextStyle(color: Colors.white),
-                )
+                ),
               ],
             ),
           ),
-          const SizedBox(
-            height: 30,
-          ),
+          const SizedBox(height: 30),
           TextField(
             focusNode: _focusNode,
             controller: controller,
@@ -259,9 +252,7 @@ class _FavoriteListState extends ConsumerState<FavoriteList> {
               ),
               label: Text(
                 'List Name',
-                style: TextStyle(
-                  color: Color.fromARGB(255, 29, 144, 94),
-                ),
+                style: TextStyle(color: Color.fromARGB(255, 29, 144, 94)),
               ),
               enabledBorder: OutlineInputBorder(
                 borderSide: BorderSide(
@@ -277,56 +268,61 @@ class _FavoriteListState extends ConsumerState<FavoriteList> {
               ),
             ),
           ),
-          const SizedBox(
-            height: 40,
-          ),
+          const SizedBox(height: 40),
           GestureDetector(
-              onTap: () {
-                final listName = controller.text;
-                bool isListNameExists = createdRestaurant
-                    .any((e) => e.restaurantName.trim() == listName);
+            onTap: () {
+              final listName = controller.text;
+              bool isListNameExists = createdRestaurant.any(
+                (e) => e.restaurantName.trim() == listName,
+              );
 
-                if (isListNameExists) {
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                      backgroundColor: Color.fromARGB(255, 87, 128, 128),
-                      content:
-                          Center(child: Text('List name already exists'))));
-                } else if (listName.isNotEmpty) {
-                  final newRestaurant = FavouriteRestaurant(
-                    restaurantName: listName,
-                    createdTime: DateTime.now(),
-                  );
-
-                  ref
-                      .read(favRestaurantProvider.notifier)
-                      .addRestaurant(newRestaurant);
-                  listBox.add(newRestaurant);
-                  controller.clear();
-
-                  Navigator.pop(context);
-                } else {
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                      backgroundColor: Color.fromARGB(255, 87, 128, 128),
-                      content:
-                          Center(child: Text('List name cannot be empty'))));
-                }
-              },
-              child: Container(
-                decoration: BoxDecoration(
-                    color: isFocused
-                        ? const Color.fromARGB(255, 29, 144, 94)
-                        : const Color.fromARGB(255, 54, 60, 66),
-                    borderRadius: BorderRadius.circular(5)),
-                alignment: Alignment.center,
-                width: double.infinity,
-                child: const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 12.0),
-                  child: Text(
-                    'CREATE LIST',
-                    style: TextStyle(color: Colors.white),
+              if (isListNameExists) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    backgroundColor: Color.fromARGB(255, 87, 128, 128),
+                    content: Center(child: Text('List name already exists')),
                   ),
+                );
+              } else if (listName.isNotEmpty) {
+                final newRestaurant = FavouriteRestaurant(
+                  restaurantName: listName,
+                  createdTime: DateTime.now(),
+                );
+
+                ref
+                    .read(favRestaurantProvider.notifier)
+                    .addRestaurant(newRestaurant);
+                listBox.add(newRestaurant);
+                controller.clear();
+
+                Navigator.pop(context);
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    backgroundColor: Color.fromARGB(255, 87, 128, 128),
+                    content: Center(child: Text('List name cannot be empty')),
+                  ),
+                );
+              }
+            },
+            child: Container(
+              decoration: BoxDecoration(
+                color: isFocused
+                    ? const Color.fromARGB(255, 29, 144, 94)
+                    : const Color.fromARGB(255, 54, 60, 66),
+                borderRadius: BorderRadius.circular(5),
+              ),
+              alignment: Alignment.center,
+              width: double.infinity,
+              child: const Padding(
+                padding: EdgeInsets.symmetric(vertical: 12.0),
+                child: Text(
+                  'CREATE LIST',
+                  style: TextStyle(color: Colors.white),
                 ),
-              ))
+              ),
+            ),
+          ),
         ],
       ),
     );

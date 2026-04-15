@@ -13,13 +13,13 @@ Set<FavouriteRestaurant> favouriteList(ref) {
 class FavRestaurant extends Notifier<Set<FavouriteRestaurant>> {
   @override
   Set<FavouriteRestaurant> build() {
-    final listBox = Hive.box('favList');
-    return listBox.values.cast<FavouriteRestaurant>().toSet();
+    final listBox = Hive.box<FavouriteRestaurant>('favList');
+    return listBox.values.toSet();
   }
 
   void addRestaurant(FavouriteRestaurant restaurant) {
     if (!state.contains(restaurant)) {
-      final listBox = Hive.box('favList');
+      final listBox = Hive.box<FavouriteRestaurant>('favList');
       listBox.add(restaurant);
       state = {...state, restaurant};
     }
@@ -27,7 +27,7 @@ class FavRestaurant extends Notifier<Set<FavouriteRestaurant>> {
 
   void deleteRestaurant(FavouriteRestaurant restaurant) {
     if (state.contains(restaurant)) {
-      final listBox = Hive.box('favList');
+      final listBox = Hive.box<FavouriteRestaurant>('favList');
       listBox.delete(restaurant);
       state = state.where((element) => element != restaurant).toSet();
     }
