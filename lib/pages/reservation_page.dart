@@ -28,6 +28,17 @@ class _ReservationPageState extends ConsumerState<ReservationPage> {
   ];
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final args = ModalRoute.of(context)?.settings.arguments;
+    if (args is Restaurant) {
+      _selectedRestaurantId = args.id;
+    } else if (args is String) {
+      _selectedRestaurantId = args;
+    }
+  }
+
+  @override
   void initState() {
     super.initState();
     _selectedRestaurantId = widget.restaurantId;

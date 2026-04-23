@@ -27,12 +27,6 @@ class ApiService {
         raw = dotenv.env['BACKEND_URL'] ?? defaultUrl;
       }
     } catch (_) {}
-    
-    // Fallback logic if .env has the old bad IP address still cached in memory
-    // or if it's using the host Wi-Fi IP which can be unreliable in emulators
-    if (raw.contains('10.42.')) {
-        raw = defaultUrl;
-    }
 
     // Strip trailing slashes for consistent URL construction
     baseUrl = raw.endsWith('/') ? raw.substring(0, raw.length - 1) : raw;

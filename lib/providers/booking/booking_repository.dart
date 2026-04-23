@@ -114,6 +114,20 @@ class BookingRepository {
       return false;
     }
   }
+
+  Future<List<Restaurant>> searchRestaurants(String query) async {
+    try {
+      final response = await _apiService.getWithParams('/restaurants/search', {'query': query});
+      if (response.statusCode == 200) {
+        final data = _safeDecodeList(response.body);
+        return data.map((json) => Restaurant.fromJson(json)).toList();
+      }
+      return [];
+    } catch (e) {
+      debugPrint('❌ searchRestaurants error: $e');
+      return [];
+    }
+  }
 }
 
 final bookingRepositoryProvider = Provider<BookingRepository>((ref) {

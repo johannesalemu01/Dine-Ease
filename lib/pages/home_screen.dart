@@ -1,23 +1,28 @@
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:dine_ease/models/restaurant.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:dine_ease/providers/restaurant_provider.dart';
 import 'package:dine_ease/utils/restaurants_list.dart';
 import 'package:dine_ease/utils/special_foods.dart';
 import 'package:dine_ease/utils/typeof_food.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     var imagePath = 'assets/images/gallery';
+    final restaurantsAsync = ref.watch(restaurantsProvider);
+    final nearbyAsync = ref.watch(nearbyRestaurantsProvider);
 
     // double height = MediaQuery.of(context).size.height;
     double width = MediaQuery.of(context).size.width;
     return Scaffold(
       backgroundColor: const Color(0xff0e131e),
-      //box color 0D1B2A,
 
+      //box color 0D1B2A,
       body: SingleChildScrollView(
         child: Column(
           children: [
@@ -127,19 +132,35 @@ class HomeScreen extends StatelessWidget {
                       scrollDirection: Axis.horizontal,
                       children: [
                         FoodType(
-                            width: width,
-                            'Traditional',
-                            path: '$imagePath-1.jpg'),
+                          width: width,
+                          'Traditional',
+                          path: '$imagePath-1.jpg',
+                        ),
                         FoodType(
-                            width: width, 'Modern', path: '$imagePath-2.jpg'),
+                          width: width,
+                          'Modern',
+                          path: '$imagePath-2.jpg',
+                        ),
                         FoodType(
-                            width: width, 'Vegan', path: '$imagePath-3.jpg'),
+                          width: width,
+                          'Vegan',
+                          path: '$imagePath-3.jpg',
+                        ),
                         FoodType(
-                            width: width, 'Desert', path: '$imagePath-4.jpg'),
+                          width: width,
+                          'Desert',
+                          path: '$imagePath-4.jpg',
+                        ),
                         FoodType(
-                            width: width, 'Italian', path: '$imagePath-5.jpg'),
+                          width: width,
+                          'Italian',
+                          path: '$imagePath-5.jpg',
+                        ),
                         FoodType(
-                            width: width, 'Mexican', path: '$imagePath-6.jpg'),
+                          width: width,
+                          'Mexican',
+                          path: '$imagePath-6.jpg',
+                        ),
                       ],
                     ),
                   ),
@@ -167,8 +188,9 @@ class HomeScreen extends StatelessWidget {
                               child: const Text(
                                 'See more',
                                 style: TextStyle(
-                                    color: Color.fromARGB(255, 251, 147, 91),
-                                    fontSize: 16),
+                                  color: Color.fromARGB(255, 251, 147, 91),
+                                  fontSize: 16,
+                                ),
                               ),
                             ),
                           ],
@@ -185,25 +207,29 @@ class HomeScreen extends StatelessWidget {
                                 path: '$imagePath-6.jpg',
                               ),
                               SpecialFood(
-                                  width: width,
-                                  labelFoodName: 'Spaghetti',
-                                  priceTag: '200 Birr',
-                                  path: '$imagePath-2.jpg'),
+                                width: width,
+                                labelFoodName: 'Spaghetti',
+                                priceTag: '200 Birr',
+                                path: '$imagePath-2.jpg',
+                              ),
                               SpecialFood(
-                                  width: width,
-                                  labelFoodName: 'Spinach',
-                                  priceTag: '400 Birr',
-                                  path: '$imagePath-3.jpg'),
+                                width: width,
+                                labelFoodName: 'Spinach',
+                                priceTag: '400 Birr',
+                                path: '$imagePath-3.jpg',
+                              ),
                               SpecialFood(
-                                  width: width,
-                                  labelFoodName: 'Beef Stew',
-                                  priceTag: '500 Birr',
-                                  path: '$imagePath-4.jpg'),
+                                width: width,
+                                labelFoodName: 'Beef Stew',
+                                priceTag: '500 Birr',
+                                path: '$imagePath-4.jpg',
+                              ),
                               SpecialFood(
-                                  width: width,
-                                  labelFoodName: 'Beef Stew',
-                                  priceTag: '600 Birr',
-                                  path: '$imagePath-1.jpg'),
+                                width: width,
+                                labelFoodName: 'Beef Stew',
+                                priceTag: '600 Birr',
+                                path: '$imagePath-1.jpg',
+                              ),
                             ],
                           ),
                         ),
@@ -218,44 +244,45 @@ class HomeScreen extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const SizedBox(
-                        height: 20,
-                      ),
+                      const SizedBox(height: 20),
                       const Text(
                         'Ready to dive in?',
                         style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 22,
-                            fontWeight: FontWeight.bold),
+                          color: Colors.white,
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                      const SizedBox(
-                        height: 10,
-                      ),
+                      const SizedBox(height: 10),
                       SingleChildScrollView(
                         scrollDirection: Axis.horizontal,
                         child: Padding(
-                          padding:
-                              const EdgeInsets.only(left: 10.0, bottom: 15),
+                          padding: const EdgeInsets.only(
+                            left: 10.0,
+                            bottom: 15,
+                          ),
                           child: Row(
                             children: [
                               OfferBox(
-                                  width: width,
-                                  icon: Icons.fastfood_outlined,
-                                  headerText: 'Special offer',
-                                  descriptionText:
-                                      'Discover all our special offers that are  currently available',
-                                  linkText: 'See more'),
+                                width: width,
+                                icon: Icons.fastfood_outlined,
+                                headerText: 'Special offer',
+                                descriptionText:
+                                    'Discover all our special offers that are  currently available',
+                                linkText: 'See more',
+                              ),
                               OfferBox(
-                                  width: width,
-                                  icon: Icons.card_giftcard_outlined,
-                                  headerText: 'Gift card',
-                                  descriptionText:
-                                      'Give the gift  of an incredible dining experiance',
-                                  linkText: 'Discover gift cards'),
+                                width: width,
+                                icon: Icons.card_giftcard_outlined,
+                                headerText: 'Gift card',
+                                descriptionText:
+                                    'Give the gift  of an incredible dining experiance',
+                                linkText: 'Discover gift cards',
+                              ),
                             ],
                           ),
                         ),
-                      )
+                      ),
                     ],
                   ),
                 ),
@@ -268,68 +295,49 @@ class HomeScreen extends StatelessWidget {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const Text('Featured Restaurants',
-                              style: TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 20)),
+                          const Text(
+                            'Featured Restaurants',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 20,
+                            ),
+                          ),
                           GestureDetector(
                             onTap: () {},
                             child: const Text(
                               'See more',
                               style: TextStyle(
-                                  color: Color.fromARGB(255, 251, 147, 91),
-                                  fontSize: 16),
+                                color: Color.fromARGB(255, 251, 147, 91),
+                                fontSize: 16,
+                              ),
                             ),
-                          )
+                          ),
                         ],
                       ),
                       const SizedBox(height: 8),
-                      SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
-                        child: Row(
-                          children: [
-                            FeaturedRestaurant(
-                              width: width,
-                              imagePath: '$imagePath-1.jpg',
-                              restaurantName: 'Restaurant A',
-                              price: 300,
-                              rating: 8.9,
-                              location: 'AbayMado',
-                            ),
-                            FeaturedRestaurant(
-                              width: width,
-                              imagePath: '$imagePath-4.jpg',
-                              restaurantName: 'Restaurant B',
-                              price: 450,
-                              rating: 7.6,
-                              location: 'AbayMado',
-                            ),
-                            FeaturedRestaurant(
-                              width: width,
-                              imagePath: '$imagePath-7.jpg',
-                              restaurantName: 'Restaurant C',
-                              price: 600,
-                              rating: 9.0,
-                              location: 'AbayMado',
-                            ),
-                            FeaturedRestaurant(
-                              width: width,
-                              imagePath: '$imagePath-3.jpg',
-                              restaurantName: 'Restaurant D',
-                              price: 800,
-                              rating: 9.2,
-                              location: 'AbayMado',
-                            ),
-                            FeaturedRestaurant(
-                              width: width,
-                              imagePath: '$imagePath-1.jpg',
-                              restaurantName: 'Restaurant E',
-                              price: 230,
-                              rating: 6.9,
-                              location: 'AbayMado',
-                            ),
-                          ],
+                      restaurantsAsync.when(
+                        data: (restaurants) => SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: Row(
+                            children: restaurants
+                                .take(5)
+                                .map(
+                                  (restaurant) => FeaturedRestaurant(
+                                    width: width,
+                                    restaurant: restaurant,
+                                  ),
+                                )
+                                .toList(),
+                          ),
+                        ),
+                        loading: () =>
+                            const Center(child: CircularProgressIndicator()),
+                        error: (err, stack) => Center(
+                          child: Text(
+                            'Error: $err',
+                            style: const TextStyle(color: Colors.red),
+                          ),
                         ),
                       ),
                     ],
@@ -337,12 +345,9 @@ class HomeScreen extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(
-              height: 30,
-            ),
+            const SizedBox(height: 30),
 
-//Carousel
-
+            //Carousel
             Container(
               height: width / 3,
               decoration: const BoxDecoration(
@@ -368,169 +373,88 @@ class HomeScreen extends StatelessWidget {
                   autoPlayCurve: Curves.linear,
                   height: width / 5,
                 ),
-                items: [
-                  Image.asset('assets/images/gallery-1.jpg'),
-                  Image.asset('assets/images/gallery-2.jpg'),
-                  Image.asset('assets/images/gallery-3.jpg'),
-                  Image.asset('assets/images/gallery-4.jpg')
-                ].map((el) {
-                  return Builder(
-                    builder: (BuildContext context) {
-                      return Container(
-                        decoration: const BoxDecoration(
-                          shape: BoxShape.circle,
-                        ),
-                        child: Row(
-                          children: [
-                            Card(
-                              elevation: 5,
-                              clipBehavior: Clip.antiAlias,
-                              shape: const CircleBorder(
-                                  side: BorderSide(width: 0)),
-                              child: el,
+                items:
+                    [
+                      Image.asset('assets/images/gallery-1.jpg'),
+                      Image.asset('assets/images/gallery-2.jpg'),
+                      Image.asset('assets/images/gallery-3.jpg'),
+                      Image.asset('assets/images/gallery-4.jpg'),
+                    ].map((el) {
+                      return Builder(
+                        builder: (BuildContext context) {
+                          return Container(
+                            decoration: const BoxDecoration(
+                              shape: BoxShape.circle,
                             ),
-                            const SizedBox(
-                              width: 5,
-                            ),
-                            const Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                            child: Row(
                               children: [
-                                Text(
-                                  '10K +',
-                                  style: TextStyle(
-                                      fontSize: 22, color: Colors.white),
+                                Card(
+                                  elevation: 5,
+                                  clipBehavior: Clip.antiAlias,
+                                  shape: const CircleBorder(
+                                    side: BorderSide(width: 0),
+                                  ),
+                                  child: el,
                                 ),
-                                Text(
-                                  'Booking done',
-                                  style: TextStyle(color: Colors.white),
-                                )
+                                const SizedBox(width: 5),
+                                const Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      '10K +',
+                                      style: TextStyle(
+                                        fontSize: 22,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                    Text(
+                                      'Booking done',
+                                      style: TextStyle(color: Colors.white),
+                                    ),
+                                  ],
+                                ),
                               ],
-                            )
-                          ],
-                        ),
+                            ),
+                          );
+                        },
                       );
-                    },
-                  );
-                }).toList(),
+                    }).toList(),
               ),
             ),
-            const SizedBox(
-              height: 15,
-            ),
+            const SizedBox(height: 15),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 0.0),
               child: Container(
-                child: const Column(
+                child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Available Restaurants',
-                        style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 22,
-                            fontWeight: FontWeight.bold)),
-                    SizedBox(
-                      height: 5,
+                    const Text(
+                      'Available Restaurants',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                    Wrap(
-                      children: [
-                        RestaurantsList(
-                          imagePath:
-                              'assets/images/restaurants/restaurant-7.jpg',
-                          restaurantName: 'Restaurant A',
-                          price: 300,
-                          rating: 8.9,
-                          location: 'AbayMado',
+                    SizedBox(height: 5),
+                    nearbyAsync.when(
+                      data: (restaurants) => Wrap(
+                        children: restaurants
+                            .map(
+                              (restaurant) =>
+                                  RestaurantsList(restaurant: restaurant),
+                            )
+                            .toList(),
+                      ),
+                      loading: () =>
+                          const Center(child: CircularProgressIndicator()),
+                      error: (err, stack) => Center(
+                        child: Text(
+                          'Error: $err',
+                          style: const TextStyle(color: Colors.red),
                         ),
-                        RestaurantsList(
-                          imagePath:
-                              'assets/images/restaurants/restaurant-10.jpg',
-                          restaurantName: 'Restaurant B',
-                          price: 300,
-                          rating: 8.9,
-                          location: 'AbayMado',
-                        ),
-                        RestaurantsList(
-                          imagePath:
-                              'assets/images/restaurants/restaurant-6.jpg',
-                          restaurantName: 'Restaurant C',
-                          price: 300,
-                          rating: 8.9,
-                          location: 'AbayMado',
-                        ),
-                        RestaurantsList(
-                          imagePath:
-                              'assets/images/restaurants/restaurant-9.jpg',
-                          restaurantName: 'Restaurant D',
-                          price: 300,
-                          rating: 8.9,
-                          location: 'AbayMado',
-                        ),
-                        RestaurantsList(
-                          imagePath:
-                              'assets/images/restaurants/restaurant-12.jpg',
-                          restaurantName: 'Restaurant E',
-                          price: 300,
-                          rating: 8.9,
-                          location: 'AbayMado',
-                        ),
-                        RestaurantsList(
-                          imagePath:
-                              'assets/images/restaurants/restaurant-10.jpg',
-                          restaurantName: 'Restaurant F',
-                          price: 300,
-                          rating: 8.9,
-                          location: 'AbayMado',
-                        ),
-                        RestaurantsList(
-                          imagePath:
-                              'assets/images/restaurants/restaurant-11.jpg',
-                          restaurantName: 'Restaurant E',
-                          price: 300,
-                          rating: 8.9,
-                          location: 'AbayMado',
-                        ),
-                        RestaurantsList(
-                          imagePath:
-                              'assets/images/restaurants/restaurant-8.jpg',
-                          restaurantName: 'Restaurant F',
-                          price: 300,
-                          rating: 8.9,
-                          location: 'AbayMado',
-                        ),
-                        RestaurantsList(
-                          imagePath:
-                              'assets/images/restaurants/restaurant-12.jpg',
-                          restaurantName: 'Restaurant G',
-                          price: 300,
-                          rating: 8.9,
-                          location: 'AbayMado',
-                        ),
-                        RestaurantsList(
-                          imagePath:
-                              'assets/images/restaurants/restaurant-10.jpg',
-                          restaurantName: 'Restaurant H',
-                          price: 300,
-                          rating: 8.9,
-                          location: 'AbayMado',
-                        ),
-                        RestaurantsList(
-                          imagePath:
-                              'assets/images/restaurants/restaurant-6.jpg',
-                          restaurantName: 'Restaurant I',
-                          price: 300,
-                          rating: 8.9,
-                          location: 'AbayMado',
-                        ),
-                        RestaurantsList(
-                          imagePath:
-                              'assets/images/restaurants/restaurant-7.jpg',
-                          restaurantName: 'Restaurant J',
-                          price: 300,
-                          rating: 8.9,
-                          location: 'AbayMado',
-                        ),
-                      ],
+                      ),
                     ),
                   ],
                 ),
@@ -566,9 +490,7 @@ class OfferBox extends StatelessWidget {
       child: Card(
         elevation: 5,
         color: const Color.fromARGB(120, 14, 17, 24),
-        shape: BeveledRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        shape: BeveledRectangleBorder(borderRadius: BorderRadius.circular(12)),
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 22.0, horizontal: 15),
           child: Column(
@@ -587,15 +509,14 @@ class OfferBox extends StatelessWidget {
                         ),
                         child: Icon(icon, color: Colors.white),
                       ),
-                      const SizedBox(
-                        width: 10,
-                      ),
+                      const SizedBox(width: 10),
                       Text(
                         headerText,
                         style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold),
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ],
                   ),
@@ -606,32 +527,29 @@ class OfferBox extends StatelessWidget {
                   ),
                 ],
               ),
-              const SizedBox(
-                height: 8,
-              ),
+              const SizedBox(height: 8),
               Text(
                 descriptionText,
                 style: const TextStyle(color: Colors.white70),
               ),
-              const SizedBox(
-                height: 8,
-              ),
+              const SizedBox(height: 8),
               Row(
                 children: [
                   Text(
                     linkText,
                     style: const TextStyle(
-                        color: Color.fromARGB(255, 163, 255, 241),
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold),
+                      color: Color.fromARGB(255, 163, 255, 241),
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   const Icon(
                     Icons.chevron_right,
                     color: Color.fromARGB(255, 99, 213, 230),
                     size: 28,
-                  )
+                  ),
                 ],
-              )
+              ),
             ],
           ),
         ),
@@ -644,119 +562,139 @@ class FeaturedRestaurant extends StatelessWidget {
   const FeaturedRestaurant({
     super.key,
     required this.width,
-    required this.imagePath,
-    required this.restaurantName,
-    required this.price,
-    required this.rating,
-    required this.location,
+    required this.restaurant,
   });
 
   final double width;
-  final String imagePath;
-  final String restaurantName;
-  final double price;
-  final double rating;
-  final String location;
+  final Restaurant restaurant;
 
   @override
   Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(20),
-      clipBehavior: Clip.antiAlias,
-      child: Container(
-        margin: const EdgeInsets.only(right: 16),
-        height: 300,
-        width: width / 1.6,
-        decoration: BoxDecoration(
+    final isNetworkImage =
+        restaurant.images.isNotEmpty && restaurant.images[0].startsWith('http');
+    final imagePath = restaurant.images.isNotEmpty
+        ? restaurant.images[0]
+        : 'assets/images/gallery-1.jpg';
+
+    return GestureDetector(
+      onTap: () => Navigator.pushNamed(
+        context,
+        '/reservation_page',
+        arguments: restaurant,
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(20),
+        clipBehavior: Clip.antiAlias,
+        child: Container(
+          margin: const EdgeInsets.only(right: 16),
+          height: 300,
+          width: width / 1.6,
+          decoration: BoxDecoration(
             gradient: const LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomCenter,
-                colors: [
-                  Color.fromARGB(31, 59, 117, 134),
-                  Color.fromARGB(31, 59, 117, 134),
-                  Colors.black12,
-                  Color.fromARGB(31, 59, 117, 134),
-                  Color.fromARGB(31, 59, 117, 134),
-                ]),
-            borderRadius: BorderRadius.circular(12)),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Image.asset(
-              imagePath,
-              width: width / 1.3,
-              height: 250 / 1.25,
-              fit: BoxFit.fill,
+              begin: Alignment.topLeft,
+              end: Alignment.bottomCenter,
+              colors: [
+                Color.fromARGB(31, 59, 117, 134),
+                Color.fromARGB(31, 59, 117, 134),
+                Colors.black12,
+                Color.fromARGB(31, 59, 117, 134),
+                Color.fromARGB(31, 59, 117, 134),
+              ],
             ),
-            const SizedBox(
-              height: 10,
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8.0),
-              child: Container(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              isNetworkImage
+                  ? Image.network(
+                      imagePath,
+                      width: width / 1.3,
+                      height: 250 / 1.25,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) => Container(
+                        width: width / 1.3,
+                        height: 250 / 1.25,
+                        color: Colors.grey[800],
+                        child: const Icon(
+                          Icons.broken_image,
+                          color: Colors.white,
+                        ),
+                      ),
+                    )
+                  : Image.asset(
+                      imagePath,
+                      width: width / 1.3,
+                      height: 250 / 1.25,
+                      fit: BoxFit.fill,
+                    ),
+              const SizedBox(height: 10),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8.0),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      restaurantName,
+                      restaurant.name,
                       style: const TextStyle(color: Colors.white, fontSize: 18),
                     ),
                     Row(
                       children: [
-                        const Icon(FontAwesomeIcons.utensils,
-                            color: Color.fromARGB(255, 245, 154, 105),
-                            size: 20),
+                        const Icon(
+                          FontAwesomeIcons.utensils,
+                          color: Color.fromARGB(255, 245, 154, 105),
+                          size: 20,
+                        ),
                         const SizedBox(width: 6),
                         Text(
-                          rating.toString(),
+                          restaurant.rating.toString(),
                           style: const TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 18,
                             color: Color.fromARGB(255, 228, 152, 111),
                           ),
-                        )
+                        ),
                       ],
                     ),
                   ],
                 ),
               ),
-            ),
-            const SizedBox(
-              height: 8,
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8.0),
-              child: RichText(
-                text: TextSpan(
-                  text: 'Average Price',
-                  style: const TextStyle(
-                      color: Color.fromARGB(235, 255, 255, 255)),
-                  children: [
-                    TextSpan(
-                        text: '  $price Br',
-                        style: const TextStyle(fontWeight: FontWeight.bold))
-                  ],
+              const SizedBox(height: 8),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                child: RichText(
+                  text: TextSpan(
+                    text: 'Average Price',
+                    style: const TextStyle(
+                      color: Color.fromARGB(235, 255, 255, 255),
+                    ),
+                    children: [
+                      TextSpan(
+                        text: '  ${restaurant.averagePrice} Br',
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(
-              height: 5,
-            ),
-            Row(
-              children: [
-                const Icon(Icons.pin_drop,
-                    color: Color.fromARGB(230, 221, 148, 93)),
-                const SizedBox(
-                  width: 5,
-                ),
-                Text(
-                  location,
-                  style: const TextStyle(
-                      color: Color.fromARGB(235, 255, 255, 255)),
-                ),
-              ],
-            )
-          ],
+              const SizedBox(height: 5),
+              Row(
+                children: [
+                  const Icon(
+                    Icons.pin_drop,
+                    color: Color.fromARGB(230, 221, 148, 93),
+                  ),
+                  const SizedBox(width: 5),
+                  Text(
+                    restaurant.address,
+                    style: const TextStyle(
+                      color: Color.fromARGB(235, 255, 255, 255),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );

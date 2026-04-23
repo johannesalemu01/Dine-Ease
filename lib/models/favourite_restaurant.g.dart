@@ -19,17 +19,20 @@ class FavouriteRestaurantAdapter extends TypeAdapter<FavouriteRestaurant> {
     return FavouriteRestaurant(
       restaurantName: fields[0] as String,
       createdTime: fields[1] as DateTime,
+      restaurantId: fields[2] as String?,
     );
   }
 
   @override
   void write(BinaryWriter writer, FavouriteRestaurant obj) {
     writer
-      ..writeByte(2)
+      ..writeByte(3)
       ..writeByte(0)
       ..write(obj.restaurantName)
       ..writeByte(1)
-      ..write(obj.createdTime);
+      ..write(obj.createdTime)
+      ..writeByte(2)
+      ..write(obj.restaurantId);
   }
 
   @override

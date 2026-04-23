@@ -8,8 +8,11 @@ class FavouriteRestaurant {
   final String restaurantName;
   @HiveField(1)
   final DateTime createdTime;
+  @HiveField(2)
+  final String? restaurantId;
   const FavouriteRestaurant({
     required this.restaurantName,
     required this.createdTime,
+    this.restaurantId,
   });
 }

@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:dine_ease/providers/restaurant_provider.dart';
 import 'package:dine_ease/pages/map_page.dart';
+import 'package:dine_ease/utils/restaurants_list.dart';
 
-class SearchPage extends StatefulWidget {
+class SearchPage extends ConsumerWidget {
   const SearchPage({super.key});
 
   @override
-  State<SearchPage> createState() => _SearchPage();
-}
-
-class _SearchPage extends State<SearchPage> {
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final searchResults = ref.watch(restaurantSearchProvider);
+    final searchNotifier = ref.read(restaurantSearchProvider.notifier);
     return Scaffold(
       resizeToAvoidBottomInset: false,
       backgroundColor: Colors.black,
@@ -21,8 +21,8 @@ class _SearchPage extends State<SearchPage> {
           ),
           Container(
             color: const Color.fromARGB(255, 50, 48, 48),
-            child: const Padding(
-              padding: EdgeInsets.all(10.0),
+            child: Padding(
+              padding: const EdgeInsets.all(10.0),
               child: Column(
                 children: [
                   SizedBox(
@@ -54,12 +54,13 @@ class _SearchPage extends State<SearchPage> {
                   SizedBox(
                     height: 35,
                     child: TextField(
-                      style: TextStyle(
+                      onChanged: (value) => searchNotifier.search(value),
+                      style: const TextStyle(
                           color: Colors.white70, height: 3.5, fontSize: 14),
                       cursorColor: Colors.green,
                       cursorHeight: 14,
                       textAlignVertical: TextAlignVertical.center,
-                      decoration: InputDecoration(
+                      decoration: const InputDecoration(
                         border: InputBorder.none,
                         filled: true,
                         fillColor: Colors.black,
@@ -145,111 +146,28 @@ class _SearchPage extends State<SearchPage> {
                   const SizedBox(
                     height: 15,
                   ),
-                  Row(
-                    children: [
-                      Container(
-                        width: 30,
-                        height: 30,
-                        decoration: BoxDecoration(
-                          color: const Color.fromARGB(255, 93, 91, 91),
-                          borderRadius: BorderRadius.circular(4),
+                  searchResults.when(
+                    data: (results) {
+                      if (results.isEmpty) {
+                        return const Center(
+                          child: Text('No restaurants found', style: TextStyle(color: Colors.white70)),
+                        );
+                      }
+                      return SizedBox(
+                        height: 500,
+                        child: ListView.builder(
+                          itemCount: results.length,
+                          itemBuilder: (context, index) {
+                            final restaurant = results[index];
+                            return RestaurantsList(
+                              restaurant: restaurant,
+                            );
+                          },
                         ),
-                        child: const Icon(
-                          Icons.history_outlined,
-                          color: Colors.white,
-                        ),
-                      ),
-                      const SizedBox(
-                        width: 12,
-                      ),
-                      RichText(
-                        text: const TextSpan(
-                            text: 'Kebele 11\n',
-                            style: TextStyle(color: Colors.white, fontSize: 12),
-                            children: [TextSpan(text: 'Bahirdar')]),
-                      ),
-                      const Spacer(),
-                      const Icon(
-                        Icons.clear,
-                        color: Colors.white70,
-                        size: 22,
-                      )
-                    ],
-                  ),
-                  const SizedBox(
-                    height: 25,
-                  ),
-                  SizedBox(
-                    height: 450,
-                    child: SingleChildScrollView(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Community trends',
-                            style: TextStyle(color: Colors.white, fontSize: 14),
-                          ),
-                          SizedBox(
-                            height: 15,
-                          ),
-                          Column(
-                            children: [
-                              CommunityTrends(
-                                labelTop: 'Recommended by TheMesob',
-                                labelBottom: 'Best rated',
-                                icon: Icons.fastfood_outlined,
-                              ),
-                              CommunityTrends(
-                                labelTop: 'Cuisine',
-                                labelBottom: 'Traditional',
-                                icon: Icons.restaurant_menu_outlined,
-                              ),
-                              CommunityTrends(
-                                labelTop: 'Cuisine',
-                                labelBottom: 'Italian',
-                                icon: Icons.restaurant_outlined,
-                              ),
-                              CommunityTrends(
-                                labelTop: 'Setting and moments',
-                                labelBottom: 'Reserve',
-                                icon: Icons.table_restaurant_rounded,
-                              ),
-                              CommunityTrends(
-                                labelTop: 'Restaurant features',
-                                labelBottom: 'BedRoom',
-                                icon: Icons.bathroom_outlined,
-                              ),
-                              CommunityTrends(
-                                labelTop: 'TheMosob selection',
-                                labelBottom: 'Nearby restaurants',
-                                icon: Icons.balcony_rounded,
-                                onTap: () => Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => const MapPage(),
-                                  ),
-                                ),
-                              ),
-                              CommunityTrends(
-                                labelTop: 'TheMosob selection',
-                                labelBottom: 'New Restaurants',
-                                icon: Icons.balcony_rounded,
-                              ),
-                              CommunityTrends(
-                                labelTop: 'Dishes',
-                                labelBottom: 'Dorowot',
-                                icon: Icons.restaurant_outlined,
-                              ),
-                              CommunityTrends(
-                                labelTop: 'TheMosob',
-                                labelBottom: 'Top 10 Bahirdar',
-                                icon: Icons.restaurant_outlined,
-                              ),
-                            ],
-                          )
-                        ],
-                      ),
-                    ),
+                      );
+                    },
+                    loading: () => const Center(child: CircularProgressIndicator()),
+                    error: (err, stack) => Center(child: Text('Error: $err', style: const TextStyle(color: Colors.red))),
                   )
                 ],
               ),

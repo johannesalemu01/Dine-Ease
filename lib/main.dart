@@ -11,6 +11,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:video_player/video_player.dart';
 import 'dart:async';
 import 'package:dine_ease/pages/new_password.dart';
+import 'package:dine_ease/pages/reservation_page.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -126,6 +127,7 @@ class _MesobAPPState extends ConsumerState<MesobAPP> {
         '/cart_page': (context) => const CartPage(),
         '/settings_page': (context) => const AppSettings(),
         '/new-password': (context) => const NewPasswordPage(),
+        '/reservation_page': (context) => const ReservationPage(),
       },
     );
   }
