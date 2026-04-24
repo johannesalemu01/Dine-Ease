@@ -12,7 +12,7 @@ class ApiService {
   static const Duration _timeout = Duration(seconds: 10);
 
   ApiService() {
-    String defaultUrl = 'http://10.101.128.167:8000/api';
+    String defaultUrl = 'https://mesob-backend-b6cu.onrender.com/api';
     try {
       if (Platform.isAndroid) {
         defaultUrl = 'http://10.0.2.2:8000/api';
