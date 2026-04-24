@@ -39,8 +39,8 @@ class Restaurant {
       images: List<String>.from(json['images'] ?? []),
       rating: (json['rating'] ?? 0).toDouble(),
       reviewsCount: json['reviewsCount'] ?? 0,
-      lat: (json['location']?['coordinates']?['lat'] as num?)?.toDouble(),
-      lng: (json['location']?['coordinates']?['lng'] as num?)?.toDouble(),
+      lat: (json['location']?['coordinates'] as List?)?[1]?.toDouble(),
+      lng: (json['location']?['coordinates'] as List?)?[0]?.toDouble(),
       menu: (json['menu'] as List? ?? [])
           .map((item) => MenuItem.fromJson(item))
           .toList(),

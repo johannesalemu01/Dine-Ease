@@ -12,25 +12,28 @@ class ApiService {
   static const Duration _timeout = Duration(seconds: 10);
 
   ApiService() {
-    String defaultUrl = 'https://mesob-backend-b6cu.onrender.com/api';
-    try {
-      if (Platform.isAndroid) {
-        defaultUrl = 'http://10.0.2.2:8000/api';
-      } else if (Platform.isIOS || Platform.isMacOS) {
-        defaultUrl = 'http://localhost:8000/api';
-      }
-    } catch (_) {} // In case we're on web where Platform.isAndroid throws
+    // 1. Start with the hardcoded production fallback
+    String finalUrl = 'https://mesob-backend-b6cu.onrender.com/api';
 
-    String raw = defaultUrl;
+    // 2. Try to load from .env (this should be the primary source)
     try {
-      if (dotenv.isInitialized) {
-        raw = dotenv.env['BACKEND_URL'] ?? defaultUrl;
+      if (dotenv.isInitialized && dotenv.env.containsKey('BACKEND_URL')) {
+        finalUrl = dotenv.env['BACKEND_URL']!;
+      } else {
+        // 3. Platform-specific defaults for local development (if .env is missing)
+        try {
+          if (Platform.isAndroid) {
+            finalUrl = 'http://10.0.2.2:8000/api';
+          } else if (Platform.isIOS || Platform.isMacOS) {
+            finalUrl = 'http://localhost:8000/api';
+          }
+        } catch (_) {}
       }
     } catch (_) {}
 
-    // Strip trailing slashes for consistent URL construction
-    baseUrl = raw.endsWith('/') ? raw.substring(0, raw.length - 1) : raw;
-    debugPrint('🌐 ApiService initialized with baseUrl: $baseUrl');
+    // Strip trailing slashes
+    baseUrl = finalUrl.endsWith('/') ? finalUrl.substring(0, finalUrl.length - 1) : finalUrl;
+    debugPrint('🌐 ApiService v2 initialized with baseUrl: $baseUrl');
   }
 
   /// Returns a user-friendly diagnostic message for common connectivity errors.
