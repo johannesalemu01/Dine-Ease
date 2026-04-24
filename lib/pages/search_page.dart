@@ -16,20 +16,21 @@ class SearchPage extends ConsumerWidget {
       backgroundColor: Colors.black,
       body: Column(
         children: [
-          Container(
-            height: 50,
-          ),
+          Container(height: 50),
           Container(
             color: const Color.fromARGB(255, 50, 48, 48),
             child: Padding(
               padding: const EdgeInsets.all(10.0),
               child: Column(
                 children: [
-                  SizedBox(
+                  const SizedBox(
                     height: 35,
                     child: TextField(
                       style: TextStyle(
-                          color: Colors.white70, height: 3.5, fontSize: 14),
+                        color: Colors.white70,
+                        height: 3.5,
+                        fontSize: 14,
+                      ),
                       cursorColor: Colors.green,
                       cursorHeight: 14,
                       textAlignVertical: TextAlignVertical.center,
@@ -43,20 +44,23 @@ class SearchPage extends ConsumerWidget {
                           size: 18,
                         ),
                         hintText: 'Address, Kebele ...',
-                        hintStyle:
-                            TextStyle(color: Colors.white70, fontSize: 12),
+                        hintStyle: TextStyle(
+                          color: Colors.white70,
+                          fontSize: 12,
+                        ),
                       ),
                     ),
                   ),
-                  SizedBox(
-                    height: 8,
-                  ),
+                  const SizedBox(height: 8),
                   SizedBox(
                     height: 35,
                     child: TextField(
                       onChanged: (value) => searchNotifier.search(value),
                       style: const TextStyle(
-                          color: Colors.white70, height: 3.5, fontSize: 14),
+                        color: Colors.white70,
+                        height: 3.5,
+                        fontSize: 14,
+                      ),
                       cursorColor: Colors.green,
                       cursorHeight: 14,
                       textAlignVertical: TextAlignVertical.center,
@@ -70,18 +74,18 @@ class SearchPage extends ConsumerWidget {
                           size: 18,
                         ),
                         hintText: 'Type of food , restaurant name ...',
-                        hintStyle:
-                            TextStyle(color: Colors.white70, fontSize: 12),
+                        hintStyle: TextStyle(
+                          color: Colors.white70,
+                          fontSize: 12,
+                        ),
                       ),
                     ),
-                  )
+                  ),
                 ],
               ),
             ),
           ),
-          const SizedBox(
-            height: 15,
-          ),
+          const SizedBox(height: 15),
           Container(
             child: Column(
               children: [
@@ -91,8 +95,9 @@ class SearchPage extends ConsumerWidget {
                       padding: const EdgeInsets.only(left: 12.0),
                       child: Container(
                         decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(3),
-                            border: Border.all(color: Colors.white54)),
+                          borderRadius: BorderRadius.circular(3),
+                          border: Border.all(color: Colors.white54),
+                        ),
                         child: const Padding(
                           padding: EdgeInsets.all(3.0),
                           child: Icon(
@@ -102,28 +107,19 @@ class SearchPage extends ConsumerWidget {
                         ),
                       ),
                     ),
-                    const SizedBox(
-                      width: 12,
-                    ),
+                    const SizedBox(width: 12),
                     const Text(
                       'Search all restaurants',
                       style: TextStyle(color: Colors.white),
-                    )
+                    ),
                   ],
                 ),
-                const SizedBox(
-                  height: 15,
-                ),
-                const Divider(
-                  color: Colors.white38,
-                  thickness: 0.5,
-                )
+                const SizedBox(height: 15),
+                const Divider(color: Colors.white38, thickness: 0.5),
               ],
             ),
           ),
-          const SizedBox(
-            height: 10,
-          ),
+          const SizedBox(height: 10),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 10.0),
             child: Container(
@@ -143,14 +139,15 @@ class SearchPage extends ConsumerWidget {
                       ),
                     ],
                   ),
-                  const SizedBox(
-                    height: 15,
-                  ),
+                  const SizedBox(height: 15),
                   searchResults.when(
                     data: (results) {
                       if (results.isEmpty) {
                         return const Center(
-                          child: Text('No restaurants found', style: TextStyle(color: Colors.white70)),
+                          child: Text(
+                            'No restaurants found',
+                            style: TextStyle(color: Colors.white70),
+                          ),
                         );
                       }
                       return SizedBox(
@@ -159,20 +156,24 @@ class SearchPage extends ConsumerWidget {
                           itemCount: results.length,
                           itemBuilder: (context, index) {
                             final restaurant = results[index];
-                            return RestaurantsList(
-                              restaurant: restaurant,
-                            );
+                            return RestaurantsList(restaurant: restaurant);
                           },
                         ),
                       );
                     },
-                    loading: () => const Center(child: CircularProgressIndicator()),
-                    error: (err, stack) => Center(child: Text('Error: $err', style: const TextStyle(color: Colors.red))),
-                  )
+                    loading: () =>
+                        const Center(child: CircularProgressIndicator()),
+                    error: (err, stack) => Center(
+                      child: Text(
+                        'Error: $err',
+                        style: const TextStyle(color: Colors.red),
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
-          )
+          ),
         ],
       ),
     );
@@ -204,13 +205,12 @@ class CommunityTrends extends StatelessWidget {
             Container(
               width: 32,
               height: 32,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(4),
-              ),
+              decoration: BoxDecoration(borderRadius: BorderRadius.circular(4)),
               child: Container(
                 decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(3),
-                    border: Border.all(color: Colors.white54)),
+                  borderRadius: BorderRadius.circular(3),
+                  border: Border.all(color: Colors.white54),
+                ),
                 child: Padding(
                   padding: const EdgeInsets.all(1.0),
                   child: Icon(
@@ -221,17 +221,16 @@ class CommunityTrends extends StatelessWidget {
                 ),
               ),
             ),
-            const SizedBox(
-              width: 12,
-            ),
+            const SizedBox(width: 12),
             RichText(
               text: TextSpan(
                 text: '$labelTop\n',
                 style: const TextStyle(color: Colors.white70, fontSize: 12),
                 children: [
                   TextSpan(
-                      text: labelBottom,
-                      style: const TextStyle(color: Colors.white, fontSize: 15)),
+                    text: labelBottom,
+                    style: const TextStyle(color: Colors.white, fontSize: 15),
+                  ),
                 ],
               ),
             ),
