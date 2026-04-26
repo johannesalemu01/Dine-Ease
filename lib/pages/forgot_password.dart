@@ -22,13 +22,40 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
   }
 
   Future<void> _submit() async {
-    final email = _emailController.text.trim();
+    final rawEmail = _emailController.text;
+
+    // Sanitize email: remove hidden/control characters and trim
+    String sanitizeEmail(String e) {
+      var s = e.replaceAll(RegExp(r'[\u200B\u200C\u200D\uFEFF\u2060]'), '');
+      s = s.replaceAll(RegExp(r'[\x00-\x1F\x7F]'), '');
+      return s.trim();
+    }
+
+    final email = sanitizeEmail(rawEmail).toLowerCase();
+
     if (email.isEmpty) {
       Fluttertoast.showToast(
         msg: 'Please enter your email',
         toastLength: Toast.LENGTH_SHORT,
         gravity: ToastGravity.BOTTOM,
         backgroundColor: Colors.black87,
+        textColor: Colors.white,
+      );
+      return;
+    }
+
+    // Basic email format validation
+    bool isValidEmail(String e) {
+      final emailRegex = RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]+$');
+      return emailRegex.hasMatch(e);
+    }
+
+    if (!isValidEmail(email)) {
+      Fluttertoast.showToast(
+        msg: 'Please enter a valid email address',
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        backgroundColor: Colors.red.shade700,
         textColor: Colors.white,
       );
       return;

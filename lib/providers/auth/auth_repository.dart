@@ -220,29 +220,30 @@ class AuthRepository {
   Future<String?> resetPassword(String email) async {
     try {
       // Use platform-appropriate redirect URI:
-      // - On mobile use the app scheme so the recovery link opens the app directly.
-      // - On web use your HTTPS redirector (replace YOUR_DOMAIN) because web cannot open app schemes.
+      // On mobile use the app scheme registered in AndroidManifest/Info.plist
+      const mobileScheme = 'io.supabase.flutterquickstart://login-callback';
+      
+      // On web we need an HTTPS domain. If not set, we'll try to fallback 
+      // but Supabase usually requires this to be whitelisted.
       const redirectUri = kIsWeb
-          ? 'https://YOUR_DOMAIN/supabase-redirect?to=io.supabase.flutterquickstart://login-callback'
-          : 'io.supabase.flutterquickstart://login-callback';
+          ? 'https://dine-ease-web.vercel.app/supabase-redirect?to=$mobileScheme'
+          : mobileScheme;
 
       // Retry transient server errors a few times with exponential backoff.
       const int maxAttempts = 3;
       int attempt = 0;
       while (true) {
         try {
+          // Restore: Use the verified mobile redirect scheme.
+          // This ensures the link in the email opens the app directly.
           await _supabase.auth.resetPasswordForEmail(
             email,
-            redirectTo: redirectUri,
+            redirectTo: redirectUri.contains('YOUR_DOMAIN') ? null : redirectUri,
           );
 
           if (kDebugMode) {
             debugPrint(
-              'AuthRepository.resetPassword: reset email requested for $email redirectTo=$redirectUri (attempt ${attempt + 1})',
-            );
-            debugPrint(
-              'If emails still show localhost:3000, set Project → Authentication → Settings → Site URL to https://YOUR_DOMAIN and add the redirect URLs: '
-              'https://YOUR_DOMAIN/supabase-redirect and io.supabase.flutterquickstart://login-callback',
+              'AuthRepository.resetPassword: Reset requested for $email (Redirecting to app)',
             );
           }
           return null; // success
@@ -250,15 +251,17 @@ class AuthRepository {
           // Determine if error looks like a transient server failure (5xx / unexpected_failure).
           bool isTransient = false;
           String rawMsg = e.toString();
+          int? statusCode;
+          
           try {
             final dyn = e as dynamic;
-            final status =
-                dyn.statusCode ?? dyn.status ?? dyn.response?.statusCode;
-            if (status is int && status >= 500 && status < 600) {
-              isTransient = true;
-            }
+            statusCode = dyn.statusCode ?? dyn.status ?? dyn.response?.statusCode;
             final msg = dyn.message ?? dyn.error_description ?? dyn.toString();
             rawMsg = msg.toString();
+            
+            if (statusCode is int && statusCode >= 500 && statusCode < 600) {
+              isTransient = true;
+            }
             if (rawMsg.contains('unexpected_failure') ||
                 rawMsg.contains('Error sending recovery email')) {
               isTransient = true;
@@ -275,16 +278,20 @@ class AuthRepository {
 
           attempt++;
           if (isTransient && attempt < maxAttempts) {
-            // small exponential backoff
             final delayMs = 300 * (1 << (attempt - 1));
             await Future.delayed(Duration(milliseconds: delayMs));
             continue; // retry
           }
 
-          // Map to user-friendly message for production; keep full detail only in debug.
-          if (isTransient) {
-            return 'Unable to send reset email right now. Please check your backend (SMTP / Supabase Auth settings) or try again later.';
+          // Handle specific non-transient status codes
+          if (statusCode == 429) {
+            return 'Rate limit exceeded. Please wait a minute before trying again.';
           }
+
+          if (isTransient) {
+            return 'Unable to send reset email right now. This usually means a transient Supabase or SMTP error. Try again in a few minutes.';
+          }
+          
           // Non-transient: return the server-provided message where safe
           try {
             return (e as dynamic).message ?? rawMsg;
@@ -294,7 +301,6 @@ class AuthRepository {
         }
       }
     } catch (e, st) {
-      // Should not reach here normally, but defensively handle any unexpected errors.
       if (kDebugMode) {
         debugPrint('AuthRepository.resetPassword unexpected error: $e\n$st');
       }
