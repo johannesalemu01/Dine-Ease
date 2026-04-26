@@ -12,6 +12,7 @@ import 'package:video_player/video_player.dart';
 import 'dart:async';
 import 'package:dine_ease/pages/new_password.dart';
 import 'package:dine_ease/pages/reservation_page.dart';
+import 'package:dine_ease/pages/map_page.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -128,6 +129,7 @@ class _MesobAPPState extends ConsumerState<MesobAPP> {
         '/settings_page': (context) => const AppSettings(),
         '/new-password': (context) => const NewPasswordPage(),
         '/reservation_page': (context) => const ReservationPage(),
+        '/map_page': (context) => const MapPage(),
       },
     );
   }

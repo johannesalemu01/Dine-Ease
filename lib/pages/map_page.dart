@@ -27,6 +27,25 @@ class _MapPageState extends ConsumerState<MapPage> {
     _initLocation();
   }
 
+  bool _initializedWithArgs = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_initializedWithArgs) {
+      final args = ModalRoute.of(context)?.settings.arguments;
+      if (args is Restaurant) {
+        _selectedRestaurant = args;
+        if (args.lat != null && args.lng != null) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            _mapController.move(LatLng(args.lat!, args.lng!), 16);
+          });
+        }
+      }
+      _initializedWithArgs = true;
+    }
+  }
+
   Future<void> _initLocation() async {
     final location = loc.Location();
     bool serviceEnabled;

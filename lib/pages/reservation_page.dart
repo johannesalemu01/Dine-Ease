@@ -147,6 +147,37 @@ class _ReservationPageState extends ConsumerState<ReservationPage> {
                 onChanged: (val) => setState(() => _selectedRestaurantId = val),
               ),
             ),
+            if (_selectedRestaurantId != null) ...[
+              const SizedBox(height: 10),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 4),
+                child: Row(
+                  children: [
+                    const Icon(Icons.location_on, color: Color(0xfff7B43f), size: 14),
+                    const SizedBox(width: 4),
+                    Expanded(
+                      child: Text(
+                        _restaurants.firstWhere((r) => r.id == _selectedRestaurantId).address,
+                        style: const TextStyle(color: Colors.white70, fontSize: 13),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    TextButton.icon(
+                      onPressed: () {
+                        final restaurant = _restaurants.firstWhere((r) => r.id == _selectedRestaurantId);
+                        Navigator.pushNamed(context, '/map_page', arguments: restaurant);
+                      },
+                      icon: const Icon(Icons.map_outlined, size: 16, color: Color(0xfff7B43f)),
+                      label: const Text(
+                        'View on Map',
+                        style: TextStyle(color: Color(0xfff7B43f), fontSize: 13, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
             const SizedBox(height: 30),
             Row(
               children: [

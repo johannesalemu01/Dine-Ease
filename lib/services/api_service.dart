@@ -9,7 +9,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class ApiService {
   late final String baseUrl;
-  static const Duration _timeout = Duration(seconds: 10);
+  static const Duration _timeout = Duration(seconds: 30);
 
   ApiService() {
     // 1. Start with the hardcoded production fallback
