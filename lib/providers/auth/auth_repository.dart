@@ -160,6 +160,13 @@ class AuthRepository {
         serverClientId: webClientId,
       );
 
+      // Force the account picker dialog to show every time by signing out first
+      try {
+        await googleSignIn.signOut();
+      } catch (_) {
+        // ignore errors if not previously signed in
+      }
+
       final account = await googleSignIn.signIn();
       if (account == null) {
         return 'Google sign-in cancelled';
