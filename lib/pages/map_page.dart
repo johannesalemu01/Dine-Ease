@@ -36,6 +36,8 @@ class _MapPageState extends ConsumerState<MapPage> {
       final args = ModalRoute.of(context)?.settings.arguments;
       if (args is Restaurant) {
         _selectedRestaurant = args;
+        // If we have a target restaurant, we don't want to block the UI waiting for current location
+        _isLoading = false; 
         if (args.lat != null && args.lng != null) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             _mapController.move(LatLng(args.lat!, args.lng!), 16);
@@ -83,7 +85,10 @@ class _MapPageState extends ConsumerState<MapPage> {
           currentLocation.latitude!,
           currentLocation.longitude!,
         );
-        _animateToUser();
+        // Only auto-animate to user if we haven't already focused on a specific restaurant
+        if (_selectedRestaurant == null) {
+          _animateToUser();
+        }
       }
     } catch (e) {
       _showError('Could not retrieve location: $e');
@@ -358,7 +363,7 @@ class _MapPageState extends ConsumerState<MapPage> {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
       child: Container(
         padding: const EdgeInsets.all(12),
-        height: 120,
+        height: 140,
         child: Row(
           children: [
             ClipRRect(
@@ -368,10 +373,10 @@ class _MapPageState extends ConsumerState<MapPage> {
                     ? restaurant.images[0]
                     : 'https://via.placeholder.com/100',
                 width: 100,
-                height: 100,
+                height: 116,
                 fit: BoxFit.cover,
                 errorBuilder: (_, __, ___) =>
-                    Container(color: Colors.grey, width: 100, height: 100),
+                    Container(color: Colors.grey, width: 100, height: 116),
               ),
             ),
             const SizedBox(width: 12),
@@ -398,7 +403,7 @@ class _MapPageState extends ConsumerState<MapPage> {
                     children: [
                       ...List.generate(5, (index) {
                         return Icon(
-                          index < (restaurant.rating / 2).floor()
+                          index < restaurant.rating.floor()
                               ? Icons.star
                               : Icons.star_border,
                           color: Colors.amber,
@@ -415,7 +420,7 @@ class _MapPageState extends ConsumerState<MapPage> {
                       ),
                     ],
                   ),
-                  const Spacer(),
+                  const SizedBox(height: 8),
                   ElevatedButton.icon(
                     onPressed: () {}, // TODO: Open maps for directions
                     icon: const Icon(Icons.directions, size: 16),
